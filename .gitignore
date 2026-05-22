@@ -6,3 +6,4 @@ testing/results/run-*/
 ~/.durable-request/data/goal.json
 website/node_modules/
 website/dist/
+testing/scripts/__pycache__/
