@@ -1,7 +1,7 @@
 """
 patterns.py — Feature definitions and regex detectors for cursor-goal testing.
 
-Features F11-F13 detect /goal skill behaviors in agent session transcripts.
+Features F11-F18 detect /goal skill behaviors in agent session transcripts.
 """
 
 import re
@@ -60,7 +60,9 @@ FEATURES = {
         pattern=re.compile(
             r'--test\s+"[^"]+"'
             r'|Validation.*PASSED.*exit 0'
-            r'|Validation.*FAILED.*exit',
+            r'|Validation.*FAILED.*exit'
+            r'|pytest\s+[\w/.-]+'
+            r'|eslint\s+[\w/.-]+',
             re.IGNORECASE,
         ),
         min_samples=5,
@@ -72,6 +74,59 @@ FEATURES = {
             r'goal-manage\.sh\s+done'
             r'|\[goal\].*Goal achieved'
             r'|"status":\s*"achieved"',
+            re.IGNORECASE,
+        ),
+        min_samples=5,
+    ),
+    "F14": Feature(
+        id="F14",
+        name="Goal pause/resume lifecycle",
+        pattern=re.compile(
+            r'/goal\s+pause'
+            r'|/goal\s+resume'
+            r'|goal-manage\.sh\s+pause'
+            r'|goal-manage\.sh\s+resume'
+            r'|"status":\s*"paused"',
+            re.IGNORECASE,
+        ),
+        min_samples=5,
+    ),
+    "F15": Feature(
+        id="F15",
+        name="Natural language condition parsing",
+        pattern=re.compile(
+            r'/goal\s+(?!.*--test)(?!.*--budget)[^\n]+'
+            r'|goal-manage\.sh\s+create\s+(?!.*--test)',
+            re.IGNORECASE,
+        ),
+        min_samples=5,
+    ),
+    "F16": Feature(
+        id="F16",
+        name="Multi-cycle evaluation",
+        pattern=re.compile(
+            r'YES:\s*.+|NO:\s*.+',
+            re.IGNORECASE,
+        ),
+        min_samples=5,
+        count_mode="count",
+    ),
+    "F17": Feature(
+        id="F17",
+        name="Budget inline parsing",
+        pattern=re.compile(
+            r'stop after\s+\d+\s+turns?'
+            r'|after\s+\d+\s+turns?',
+            re.IGNORECASE,
+        ),
+        min_samples=5,
+    ),
+    "F18": Feature(
+        id="F18",
+        name="Goal clear/cancel",
+        pattern=re.compile(
+            r'/goal\s+(clear|cancel|stop|reset)'
+            r'|goal-manage\.sh\s+(clear|cancel|reset)',
             re.IGNORECASE,
         ),
         min_samples=5,
@@ -92,7 +147,16 @@ WORKLOAD_FEATURES = {
     "12-goal-with-test": ["F11", "F12", "F13", "F13a", "F13b"],
     "13-goal-budget": ["F11", "F13"],
     "14-goal-no-test": ["F11", "F12", "F13b"],
-    "15-goal-pause-resume": ["F11"],
+    "15-goal-pause-resume": ["F11", "F14", "F15", "F17"],
+    "16-goal-natural-migration": ["F11", "F12", "F13b", "F15"],
+    "17-goal-lint-fix": ["F11", "F12", "F13b", "F15"],
+    "18-goal-test-coverage": ["F11", "F12", "F13a", "F13b", "F15"],
+    "19-goal-refactor-split": ["F11", "F12", "F13b", "F15"],
+    "20-goal-docs-generation": ["F11", "F12", "F13b", "F15"],
+    "21-goal-ci-fix": ["F11", "F12", "F13", "F13a", "F13b"],
+    "22-goal-backlog-drain": ["F11", "F12", "F13b", "F15"],
+    "23-goal-concurrent-eval": ["F11", "F12", "F13", "F16", "F17"],
+    "24-goal-natural-vague-to-specific": ["F11", "F12", "F15"],
 }
 
 
@@ -109,6 +173,14 @@ def check_feature(transcript: str, feature_id: str) -> dict:
     if feature_id == "F-NOT":
         return {
             "found": count == 0,  # pass if NOT found
+            "count": count,
+            "feature": feature,
+        }
+
+    # F16 requires multiple evaluation cycles (at least 2 YES/NO responses)
+    if feature_id == "F16":
+        return {
+            "found": count >= 2,
             "count": count,
             "feature": feature,
         }

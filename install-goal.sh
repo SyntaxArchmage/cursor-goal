@@ -19,6 +19,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 INSTALL_DIR="${HOME}/.cursor/skills/goal"
+AGENTS_DIR="${HOME}/.cursor/agents"
 DATA_DIR="${HOME}/.durable-request/data"
 CURSOR_HOOKS_FILE="${HOME}/.cursor/hooks.json"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -42,12 +43,12 @@ check_dependencies() {
 
 install_skill_files() {
   log_step "Installing skill files..."
-  mkdir -p "$INSTALL_DIR" "$DATA_DIR"
+  mkdir -p "$INSTALL_DIR" "$AGENTS_DIR" "$DATA_DIR"
 
   local SOURCE_DIR="${SCRIPT_DIR}/.cursor/skills/goal"
   if [ ! -d "$SOURCE_DIR" ]; then
     log_error "Source directory not found: $SOURCE_DIR"
-    log_error "Run this script from the durable-request repo root."
+    log_error "Run this script from the cursor-goal repo root."
     exit 1
   fi
 
@@ -57,6 +58,12 @@ install_skill_files() {
 
   chmod +x "$INSTALL_DIR/goal-manage.sh"
   chmod +x "$INSTALL_DIR/goal-stop.sh"
+
+  # Install subagent definition
+  if [ -f "${SCRIPT_DIR}/.cursor/agents/goal.md" ]; then
+    cp "${SCRIPT_DIR}/.cursor/agents/goal.md" "$AGENTS_DIR/goal.md"
+    log_info "Installed: $AGENTS_DIR/goal.md"
+  fi
 
   log_info "Installed: $INSTALL_DIR/goal-manage.sh"
   log_info "Installed: $INSTALL_DIR/goal-stop.sh"
@@ -121,6 +128,7 @@ print_summary() {
   echo -e "${GREEN}============================================${NC}"
   echo ""
   echo "Components:"
+  echo "  goal.md          $AGENTS_DIR/goal.md (subagent)"
   echo "  goal-manage.sh   $INSTALL_DIR/goal-manage.sh"
   echo "  goal-stop.sh     $INSTALL_DIR/goal-stop.sh"
   echo "  SKILL.md         $INSTALL_DIR/SKILL.md"
@@ -128,8 +136,8 @@ print_summary() {
   echo "  Data dir         $DATA_DIR"
   echo ""
   echo "Usage in Cursor agent:"
-  echo "  /goal \"all tests pass\" --test \"npm test\""
-  echo "  /goal \"build succeeds\" --test \"npm run build\" --budget 30"
+  echo "  /goal all tests pass and lint is clean"
+  echo "  /goal migrate API to v2 until build succeeds, stop after 20 turns"
   echo "  /goal status"
   echo "  /goal pause | resume | clear"
   echo ""

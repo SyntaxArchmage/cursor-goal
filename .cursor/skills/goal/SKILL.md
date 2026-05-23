@@ -4,13 +4,13 @@ Set a persistent objective. Work toward it across turns until it's met.
 
 ## How It Works
 
-You set a completion condition. After each work phase, a subagent evaluates
-whether the condition holds. If not, you continue working. A stop hook provides
-a safety net between turns — if you end a turn with the goal still active,
-the hook auto-continues you with a `followup_message`.
+The user states a completion condition in natural language. After each work
+phase, a subagent evaluates whether the condition holds. If not, you continue
+working. A stop hook provides a safety net between turns — if you end a turn
+with the goal still active, the hook auto-continues you with a `followup_message`.
 
 ```
-/goal "all tests pass" --test "npm test" --budget 20
+/goal all tests in test/auth pass and the lint step is clean
   ↓
 goal-manage.sh create → goal.json written
   ↓
@@ -25,24 +25,45 @@ Still active → followup_message (auto-continue)
 Achieved → {} (allow stop)
 ```
 
+## Parsing User Input
+
+Users type `/goal` followed by a natural language condition. Parse flexibly:
+
+```
+/goal all tests pass
+/goal migrate all API calls to v2 until the build succeeds
+/goal fix the failing CI, verified by npm test, stop after 10 turns
+/goal every file in src/ has JSDoc on exported functions
+```
+
+Extract from the natural language:
+- **condition**: the completion criteria (required)
+- **validation command**: if the user mentions a specific command, use it as --test
+- **budget**: if the user says "stop after N turns", use it as --budget
+
+Explicit flags are also accepted:
+```
+/goal "all tests pass" --test "npm test" --budget 20
+```
+
 ## Command Reference
 
 | Command | Action |
 |---------|--------|
-| `/goal "<condition>"` | Set goal and start working |
-| `/goal "<condition>" --test "<cmd>"` | Set goal with validation command |
-| `/goal "<condition>" --budget <N>` | Set goal with custom turn budget (default: 20) |
+| `/goal <condition>` | Set goal and start working |
 | `/goal status` | Show current goal state |
 | `/goal pause` | Pause auto-continuation |
 | `/goal resume` | Resume a paused goal |
 | `/goal clear` | Remove goal entirely |
 
+Aliases for clear: `stop`, `off`, `reset`, `cancel`
+
 ## Setting a Goal
 
-When the user says `/goal`, parse the command and manage state:
+When the user says `/goal`, parse the condition and manage state:
 
 ```bash
-# Create a goal
+# Create a goal (condition is natural language, flags are optional)
 bash ~/.cursor/skills/goal/goal-manage.sh create "<condition>" --test "<cmd>" --budget <N>
 
 # Other lifecycle commands
@@ -64,12 +85,19 @@ While the goal is active (`status: "pursuing"`), repeat this cycle:
 
 1. **Do focused work** — make code changes, run commands, fix issues
 2. **Run validation** (if `--test` provided) — execute the test command via Shell
-3. **Evaluate** — spawn a readonly subagent to judge completion
+3. **MANDATORY: Evaluate** — spawn a readonly subagent to judge completion
 4. **Act on result** — YES → mark done. NO → incorporate reason, continue.
 
-### Evaluation via Subagent
+⚠️ **CRITICAL RULE:** You MUST call the evaluator subagent (step 3) before
+calling `goal-manage.sh done`. NEVER self-assess. NEVER skip the subagent.
+The whole point of the two-layer architecture is that a SEPARATE model judges
+completion — not you. If you mark done without spawning an evaluator, the
+goal protocol is violated.
 
-After each significant work phase (not every micro-action), evaluate:
+### Evaluation via Subagent (MANDATORY)
+
+After each significant work phase (not every micro-action), you MUST evaluate
+by spawning a real `Task` subagent:
 
 ```
 Task(
@@ -108,6 +136,15 @@ Task(
 2. Continue working toward the goal in the same turn
 3. After more work, evaluate again
 4. Do NOT end the turn while the goal is still pursuing
+
+### Checklist Before Marking Done
+
+Before you call `goal-manage.sh done`, verify ALL of these:
+- [ ] A `Task(readonly: true)` subagent was spawned with the evaluation prompt
+- [ ] The subagent returned a response starting with "YES:"
+- [ ] You are NOT self-assessing (your own judgment does not count)
+
+If any of these are false, DO NOT mark done. Spawn the evaluator first.
 
 ### When to Evaluate
 
@@ -148,28 +185,31 @@ Users can customize: `/goal "condition" --budget 50`
 
 ## Writing Good Conditions
 
-Good conditions are specific and verifiable:
+Conditions work best when they describe a verifiable end state. Write them
+like you'd tell a colleague "keep going until...":
 
 ```
-✓ "all tests in test/auth/ pass"                    → run tests, check exit code
-✓ "npm run build exits with code 0"                 → run build, check exit code
-✓ "no ESLint errors in src/"                        → run eslint, check output
-✓ "the login page renders without console errors"   → observable in test output
+✓ all tests in test/auth pass and the lint step is clean
+✓ every call site of the old API has been migrated and the build succeeds
+✓ CHANGELOG.md has an entry for every PR merged this week
+✓ no ESLint errors in src/, stop after 15 turns
+✓ the login flow works end-to-end with the new auth provider
 ```
 
-Bad conditions are vague or subjective:
+Bad conditions are vague or have no observable proof:
 
 ```
-✗ "the code is clean"                → no objective measure
-✗ "implement the feature"            → too vague, when is it "done"?
-✗ "fix the bug"                      → which bug? what proves it's fixed?
+✗ the code is clean
+✗ implement the feature
+✗ fix the bug
 ```
 
-When the condition has a natural test command, always use `--test`:
+You can include the check method and budget inline:
+
 ```
-/goal "all tests pass" --test "npm test"
-/goal "build succeeds" --test "npm run build"
-/goal "no lint errors" --test "eslint src/ --quiet"
+/goal all tests pass, verified by npm test, stop after 20 turns
+/goal split utils.ts into focused modules until each is under 200 lines
+/goal drain the P1 issue backlog until the queue is empty
 ```
 
 ## State File

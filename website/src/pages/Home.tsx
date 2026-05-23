@@ -1,25 +1,7 @@
 import { motion } from 'framer-motion'
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.6 } }),
-}
-
-function CodeBlock({ title, children }: { title: string; children: string }) {
-  return (
-    <div className="code-block">
-      <div className="code-block-header">
-        <span className="code-dot code-dot-red" />
-        <span className="code-dot code-dot-yellow" />
-        <span className="code-dot code-dot-green" />
-        <span className="ml-2 text-xs text-[var(--color-muted)]">{title}</span>
-      </div>
-      <pre className="p-4 text-sm leading-relaxed overflow-x-auto font-[var(--font-mono)] text-gray-300">
-        {children}
-      </pre>
-    </div>
-  )
-}
+import Nav from '../components/Nav'
+import { CodeBlock } from '../components/CodeBlock'
+import { fadeUp } from '../lib/animations'
 
 function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
@@ -38,18 +20,7 @@ function FeatureCard({ icon, title, desc }: { icon: string; title: string; desc:
 export default function Home() {
   return (
     <div className="min-h-screen bg-grid">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-[var(--color-bg)]/80 backdrop-blur-md border-b border-[var(--color-border)]">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="#" className="font-bold text-lg">🎯 cursor-goal</a>
-          <div className="flex gap-4 text-sm text-[var(--color-muted)]">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#how" className="hover:text-white transition-colors">How It Works</a>
-            <a href="#install" className="hover:text-white transition-colors">Install</a>
-            <a href="https://github.com/SyntaxArchmage/cursor-goal" className="hover:text-white transition-colors">GitHub</a>
-          </div>
-        </div>
-      </nav>
+      <Nav />
 
       {/* Hero */}
       <section className="pt-32 pb-20 px-6">
@@ -71,11 +42,10 @@ export default function Home() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
             className="max-w-2xl mx-auto">
-            <CodeBlock title="Cursor Agent Chat">{`/goal "all tests pass" --test "npm test" --budget 20
+            <CodeBlock title="Cursor Agent Chat">{`/goal all tests in test/auth pass and the lint step is clean
 
 [goal] Goal created:
-  Condition: all tests pass
-  Validation: npm test
+  Condition: all tests in test/auth pass and the lint step is clean
   Budget: 20 turns
   Status: pursuing
 
@@ -83,7 +53,7 @@ export default function Home() {
 # Subagent evaluates after each phase...
 # Stop hook auto-continues between turns...
 
-[goal] ✓ Goal achieved in 7 turns: all tests pass`}</CodeBlock>
+[goal] ✓ Goal achieved in 7 turns`}</CodeBlock>
           </motion.div>
         </div>
       </section>
@@ -143,10 +113,10 @@ export default function Home() {
                 <CodeBlock title="Subagent evaluation">{`Agent works → thinks it might be done
   ↓
 Task(readonly: true)
-  "Is the goal achieved?"
+  "Is the condition met?"
   ↓
-  YES: all tests passing → mark done
-  NO: 3 tests failing   → continue working`}</CodeBlock>
+  YES: tests pass, lint clean → mark done
+  NO: 2 tests still failing  → continue`}</CodeBlock>
               </div>
             </motion.div>
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
@@ -157,7 +127,7 @@ Task(readonly: true)
   ↓
 Goal still active?
   YES → { followup_message: "[GOAL] Turn 3/20.
-          Continue toward: all tests pass" }
+          Continue toward: <condition>" }
   NO  → {} (allow stop)`}</CodeBlock>
               </div>
             </motion.div>
@@ -194,7 +164,11 @@ Goal still active?
             <span className="text-gradient">Get Started</span>
           </h2>
           <CodeBlock title="Terminal">{`git clone https://github.com/SyntaxArchmage/cursor-goal.git
-cd cursor-goal && ./install-goal.sh`}</CodeBlock>
+cd cursor-goal
+mkdir -p ~/.cursor/agents ~/.cursor/skills/goal
+cp .cursor/agents/goal.md ~/.cursor/agents/
+cp .cursor/skills/goal/*.sh ~/.cursor/skills/goal/
+chmod +x ~/.cursor/skills/goal/*.sh`}</CodeBlock>
           <div className="mt-8 grid md:grid-cols-3 gap-4 text-sm">
             <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4">
               <div className="text-[var(--color-accent-light)] font-semibold mb-1">Requirements</div>
@@ -212,11 +186,10 @@ cd cursor-goal && ./install-goal.sh`}</CodeBlock>
 
           <div className="mt-12">
             <h3 className="text-xl font-semibold mb-4">Quick Usage</h3>
-            <CodeBlock title="Cursor Agent Chat">{`# Set a goal with validation
-/goal "all tests pass" --test "npm test"
-
-# Set a goal with budget
-/goal "refactor auth module" --budget 15
+            <CodeBlock title="Cursor Agent Chat">{`# Natural language — just say what "done" looks like
+/goal all tests pass and lint is clean
+/goal migrate every API call to v2 until the build succeeds
+/goal fix the failing CI, stop after 10 turns
 
 # Check status
 /goal status

@@ -22,34 +22,71 @@ Equivalent to Claude Code's `/goal` — but for Cursor.
 
 ```bash
 git clone https://github.com/SyntaxArchmage/cursor-goal.git
-cd cursor-goal && ./install-goal.sh
+cd cursor-goal
+
+# Copy agent + skill files
+mkdir -p ~/.cursor/agents ~/.cursor/skills/goal ~/.durable-request/data
+cp .cursor/agents/goal.md ~/.cursor/agents/
+cp .cursor/skills/goal/goal-manage.sh ~/.cursor/skills/goal/
+cp .cursor/skills/goal/goal-stop.sh ~/.cursor/skills/goal/
+chmod +x ~/.cursor/skills/goal/*.sh
 ```
 
-This installs:
-- `goal-manage.sh` — state management
-- `goal-stop.sh` — stop hook for auto-continuation
-- `SKILL.md` — agent behavior protocol
-- `hooks.json` — Cursor stop hook configuration
+Then add the stop hook to `~/.cursor/hooks.json` (create if missing):
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": "~/.cursor/skills/goal/goal-stop.sh",
+        "loop_limit": null,
+        "timeout": 30
+      }
+    ]
+  }
+}
+```
+
+See [install.md](install.md) for full details, verification steps, and uninstall instructions.
+
+### Automated Install (alternative)
+
+```bash
+./install-goal.sh
+```
+
+Handles hooks.json merging automatically.
 
 ### Requirements
 
 - Cursor IDE (1.7+)
-- `jq` (`sudo apt install jq`)
+- `jq` (`sudo apt install jq` / `brew install jq`)
 - `bash` 4+
 
 ## Usage
 
-In Cursor agent chat:
+In Cursor agent chat, just type `/goal` followed by what you want done:
 
 ```
-/goal "all tests pass" --test "npm test"
+/goal all tests in test/auth pass and the lint step is clean
+/goal migrate every API call to v2 until the build succeeds, stop after 20 turns
+/goal fix the failing CI checks
+/goal every exported function in src/services has JSDoc
+```
+
+The agent parses your natural language condition, starts working immediately, and keeps going until the condition is met.
+
+You can also use explicit flags if you prefer:
+
+```
+/goal "all tests pass" --test "npm test" --budget 20
 ```
 
 | Command | Description |
 |---------|-------------|
-| `/goal "<condition>"` | Set goal and start working |
-| `/goal "<condition>" --test "<cmd>"` | Set goal with validation command |
-| `/goal "<condition>" --budget <N>` | Custom turn budget (default: 20) |
+| `/goal <condition>` | Set goal and start working |
 | `/goal status` | Show current goal state |
 | `/goal pause` | Pause auto-continuation |
 | `/goal resume` | Resume a paused goal |
@@ -58,21 +95,21 @@ In Cursor agent chat:
 ## How It Works
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│  User: /goal "all tests pass" --test "npm test"         │
-│         │                                                │
-│         ▼                                                │
-│  Agent works → runs tests → spawns evaluator subagent    │
-│         │                                                │
-│         ├── Subagent: NO (3 tests failing)               │
-│         │   └── Agent continues working (same turn)      │
-│         │                                                │
-│         └── Subagent: YES (all tests pass)               │
-│             └── Goal achieved → agent stops              │
-│                                                          │
-│  Safety net: if agent ends turn with goal still active   │
-│  → stop hook sends followup_message → auto-continues     │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  User: /goal all tests pass and lint is clean, stop after 15     │
+│         │                                                         │
+│         ▼                                                         │
+│  Agent works → runs tests → spawns evaluator subagent             │
+│         │                                                         │
+│         ├── Subagent: NO (3 tests failing)                        │
+│         │   └── Agent continues working (same turn)               │
+│         │                                                         │
+│         └── Subagent: YES (all passing, lint clean)               │
+│             └── Goal achieved → agent stops                       │
+│                                                                   │
+│  Safety net: if agent ends turn with goal still active            │
+│  → stop hook sends followup_message → auto-continues              │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### Two-Layer Architecture
@@ -93,39 +130,44 @@ In Cursor agent chat:
 
 ## Writing Good Conditions
 
-Good conditions are specific and verifiable:
+Write conditions like you'd tell a colleague "keep going until...":
 
 ```
-✓ "all tests in test/auth/ pass"
-✓ "npm run build exits with code 0"
-✓ "no ESLint errors in src/"
+✓ all tests in test/auth pass and the lint step is clean
+✓ every call site of the old API has been migrated and the build succeeds
+✓ CHANGELOG.md has an entry for every PR merged this week
+✓ no ESLint errors in src/, stop after 15 turns
+✓ split utils.ts into focused modules until each is under 200 lines
 ```
 
-Bad conditions are vague:
+Bad conditions are vague or have no observable end state:
 
 ```
-✗ "the code is clean"
-✗ "implement the feature"
+✗ the code is clean
+✗ implement the feature
+✗ fix the bug
 ```
 
-When a condition has a natural test command, always use `--test`:
+You can include the check method and turn cap inline:
 
 ```
-/goal "all tests pass" --test "npm test"
-/goal "build succeeds" --test "npm run build"
-/goal "no lint errors" --test "eslint src/ --quiet"
+/goal all tests pass, verified by npm test, stop after 20 turns
+/goal drain the P1 issue backlog until the queue is empty
 ```
 
 ## File Layout
 
 ```
+~/.cursor/agents/
+└── goal.md               # Subagent definition (Cursor picks this up natively)
+
 ~/.cursor/skills/goal/
 ├── SKILL.md              # Agent behavior protocol
 ├── goal-manage.sh        # State management
 └── goal-stop.sh          # Stop hook (auto-continuation)
 
 ~/.durable-request/data/
-└── goal.json             # Runtime state
+└── goal.json             # Runtime state (created at first use)
 ```
 
 ## Compatible With
