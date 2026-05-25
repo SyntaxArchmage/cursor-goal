@@ -163,12 +163,19 @@ cmd_done() {
     exit 1
   fi
 
+  local force=false
+  [ "${1:-}" = "--force" ] && force=true
+
   local eval_flag="${DATA_DIR}/goal-eval-done"
   if [ ! -f "$eval_flag" ]; then
-    echo "[goal] ⚠️  WARNING: No evaluator signal detected for this cycle."
-    echo "[goal] Did you spawn a Task(subagent_type: \"goal\", readonly: true) evaluator?"
-    echo "[goal] If not, this is a protocol violation — spawn the evaluator first."
-    echo "[goal] Proceeding anyway, but this should be investigated."
+    echo "[goal] REJECTED: No evaluator signal detected for this cycle." >&2
+    echo "[goal] You must run: goal-eval.sh signal (after spawning an evaluator subagent)" >&2
+    echo "[goal] Then retry: goal-manage.sh done" >&2
+    if [ "$force" = true ]; then
+      echo "[goal] --force flag set, proceeding anyway (protocol violation logged)." >&2
+    else
+      exit 1
+    fi
   else
     rm -f "$eval_flag"
   fi
@@ -197,7 +204,7 @@ case "${1:-help}" in
   status) cmd_status ;;
   pause)  cmd_pause ;;
   resume) cmd_resume ;;
-  done)   cmd_done ;;
+  done)   shift; cmd_done "$@" ;;
   clear)  cmd_clear ;;
   help|*)
     echo "Usage: goal-manage.sh <command> [args...]"

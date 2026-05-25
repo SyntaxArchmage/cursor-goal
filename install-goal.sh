@@ -54,10 +54,14 @@ install_skill_files() {
 
   cp "$SOURCE_DIR/goal-manage.sh" "$INSTALL_DIR/goal-manage.sh"
   cp "$SOURCE_DIR/goal-stop.sh"   "$INSTALL_DIR/goal-stop.sh"
+  cp "$SOURCE_DIR/goal-eval.sh"   "$INSTALL_DIR/goal-eval.sh"
+  cp "$SOURCE_DIR/goal-parse.sh"  "$INSTALL_DIR/goal-parse.sh"
   cp "$SOURCE_DIR/SKILL.md"       "$INSTALL_DIR/SKILL.md"
 
   chmod +x "$INSTALL_DIR/goal-manage.sh"
   chmod +x "$INSTALL_DIR/goal-stop.sh"
+  chmod +x "$INSTALL_DIR/goal-eval.sh"
+  chmod +x "$INSTALL_DIR/goal-parse.sh"
 
   # Install subagent definition
   if [ -f "${SCRIPT_DIR}/.cursor/agents/goalKeeper.md" ]; then
@@ -67,6 +71,8 @@ install_skill_files() {
 
   log_info "Installed: $INSTALL_DIR/goal-manage.sh"
   log_info "Installed: $INSTALL_DIR/goal-stop.sh"
+  log_info "Installed: $INSTALL_DIR/goal-eval.sh"
+  log_info "Installed: $INSTALL_DIR/goal-parse.sh"
   log_info "Installed: $INSTALL_DIR/SKILL.md"
 }
 
@@ -129,8 +135,10 @@ print_summary() {
   echo ""
   echo "Components:"
   echo "  goalKeeper.md    $AGENTS_DIR/goalKeeper.md (subagent)"
-  echo "  goal-manage.sh   $INSTALL_DIR/goal-manage.sh"
-  echo "  goal-stop.sh     $INSTALL_DIR/goal-stop.sh"
+  echo "  goal-manage.sh   $INSTALL_DIR/goal-manage.sh (state lifecycle)"
+  echo "  goal-stop.sh     $INSTALL_DIR/goal-stop.sh (auto-continuation hook)"
+  echo "  goal-eval.sh     $INSTALL_DIR/goal-eval.sh (evaluator harness)"
+  echo "  goal-parse.sh    $INSTALL_DIR/goal-parse.sh (input parser)"
   echo "  SKILL.md         $INSTALL_DIR/SKILL.md"
   echo "  hooks.json       $CURSOR_HOOKS_FILE (stop hook added)"
   echo "  Data dir         $DATA_DIR"

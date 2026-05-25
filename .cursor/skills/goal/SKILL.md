@@ -4,20 +4,17 @@ Set a persistent objective. Work toward it across turns until it's met.
 
 ## How It Works
 
-The user states a completion condition in natural language. After each work
-phase, a subagent evaluates whether the condition holds. If not, you continue
-working. A stop hook provides a safety net between turns — if you end a turn
-with the goal still active, the hook auto-continues you with a `followup_message`.
-
 ```
 /goal all tests in test/auth pass and the lint step is clean
+  ↓
+goal-parse.sh → extracts condition, test cmd, budget
   ↓
 goal-manage.sh create → goal.json written
   ↓
 Agent works → runs tests → spawns evaluator subagent
   ↓
-Subagent says NO → agent continues (same turn)
-Subagent says YES → goal-manage.sh done → goal achieved
+goal-eval.sh parse-result → NO → agent continues (same turn)
+goal-eval.sh parse-result → YES → goal-eval.sh signal → goal-manage.sh done
   ↓
 Turn ends → stop hook checks goal.json
   ↓
@@ -25,26 +22,24 @@ Still active → followup_message (auto-continue)
 Achieved → {} (allow stop)
 ```
 
-## Parsing User Input
+## Setting a Goal
 
-Users type `/goal` followed by a natural language condition. Parse flexibly:
+When the user says `/goal`, use `goal-parse.sh` to extract structured args:
 
-```
-/goal all tests pass
-/goal migrate all API calls to v2 until the build succeeds
-/goal fix the failing CI, verified by npm test, stop after 10 turns
-/goal every file in src/ has JSDoc on exported functions
+```bash
+# Parse natural language into structured args
+eval "$(bash ~/.cursor/skills/goal/goal-parse.sh "<raw user input after /goal>")"
+# Outputs: CONDITION, TEST_CMD, BUDGET, GOAL_CMD (or SUBCOMMAND for status/pause/etc.)
+
+# For subcommands (status, pause, resume, clear, stop):
+eval "$GOAL_CMD"
+
+# For new goals:
+eval "$GOAL_CMD"    # runs goal-manage.sh create with extracted args
 ```
 
-Extract from the natural language:
-- **condition**: the completion criteria (required)
-- **validation command**: if the user mentions a specific command, use it as --test
-- **budget**: if the user says "stop after N turns", use it as --budget
-
-Explicit flags are also accepted:
-```
-/goal "all tests pass" --test "npm test" --budget 20
-```
+After creating the goal, **immediately start working toward the condition**.
+Do not checkpoint. Do not ask what to do. Begin.
 
 ## Command Reference
 
@@ -58,109 +53,56 @@ Explicit flags are also accepted:
 
 Aliases for clear: `stop`, `off`, `reset`, `cancel`
 
-## Setting a Goal
-
-When the user says `/goal`, parse the condition and manage state:
-
-```bash
-# Create a goal (condition is natural language, flags are optional)
-bash ~/.cursor/skills/goal/goal-manage.sh create "<condition>" --test "<cmd>" --budget <N>
-
-# Other lifecycle commands
-bash ~/.cursor/skills/goal/goal-manage.sh status
-bash ~/.cursor/skills/goal/goal-manage.sh pause
-bash ~/.cursor/skills/goal/goal-manage.sh resume
-bash ~/.cursor/skills/goal/goal-manage.sh done
-bash ~/.cursor/skills/goal/goal-manage.sh clear
-```
-
-After creating the goal, **immediately start working toward the condition**.
-Do not checkpoint. Do not ask what to do. Begin.
-
 ## Working Toward the Goal
-
-### Work Phase Protocol
 
 While the goal is active (`status: "pursuing"`), repeat this cycle:
 
 1. **Do focused work** — make code changes, run commands, fix issues
 2. **Run validation** (if `--test` provided) — execute the test command via Shell
-3. **MANDATORY: Evaluate** — spawn a readonly subagent to judge completion
-4. **Act on result** — YES → mark done. NO → incorporate reason, continue.
+3. **Evaluate** — spawn a readonly evaluator subagent (details below)
+4. **Act on result** — YES → signal + done. NO → continue.
 
-⚠️ **CRITICAL RULE — NO EXCEPTIONS:** You MUST call the evaluator subagent
-(step 3) before calling `goal-manage.sh done`. NEVER self-assess. NEVER skip
-the subagent. Even if your validation scripts show 100% success, even if you
-are absolutely certain the goal is met — you MUST still spawn the evaluator.
-Your confidence does not substitute for external verification. If you mark
-done without spawning an evaluator **in this goal cycle**, the protocol is
-violated.
+### Evaluation via Subagent
 
-**These thoughts mean STOP — you are about to self-assess:**
+After each significant work phase, generate the evaluator prompt and spawn a subagent:
 
-| Your thought | Correct action |
-|---|---|
-| "All checks pass, I'll mark done" | STOP. Spawn evaluator first. |
-| "The evidence is overwhelming" | STOP. Spawn evaluator first. |
-| "I just ran comprehensive validation" | STOP. Spawn evaluator first. |
-| "Zero failures, clearly done" | STOP. Spawn evaluator first. |
-| "This is a simple goal, evaluator is overkill" | STOP. Spawn evaluator first. |
+```bash
+# Step 1: Generate the evaluator prompt
+EVAL_PROMPT=$(bash ~/.cursor/skills/goal/goal-eval.sh prompt --work-summary "what you just did")
+```
 
-### Evaluation via Subagent (MANDATORY)
-
-After each significant work phase (not every micro-action), you MUST evaluate
-by spawning a real `Task` subagent:
+Then spawn a **readonly** evaluator subagent with the generated prompt. Use whatever
+subagent tool your platform provides — e.g. `Task`, `Agent`, `runSubagent`:
 
 ```
-Task(
-  subagent_type: "goal",
-  readonly: true,
-  description: "Evaluate goal completion",
-  prompt: "You are a goal completion evaluator. Determine whether this goal
-           condition has been achieved based on the evidence provided.
-
-           Goal condition: <condition from goal.json>
-
-           Validation command output (if available):
-           <last validation output, or 'no validation command configured'>
-
-           Recent work summary:
-           <brief description of what was just done>
-
-           Rules:
-           1. Answer ONLY with 'YES: <reason>' or 'NO: <reason>'
-           2. Be conservative — only YES when there is clear evidence
-           3. If validation command passed (exit 0), that is strong evidence
-           4. Keep reason to 1-2 sentences
-           5. For NO, explain what specific work remains"
-)
+Spawn subagent(readonly: true, prompt: $EVAL_PROMPT)
 ```
+
+The evaluator returns "YES: ..." or "NO: ...".
 
 ### Acting on Evaluation Result
 
-**Subagent returns "YES: ..."**
-1. Signal the evaluator ran: `touch ~/.durable-request/data/goal-eval-done`
-2. Run `goal-manage.sh done` via Shell
-3. Report the achievement to the user
-4. End turn normally
+Parse the result programmatically:
 
-**Subagent returns "NO: ..."**
-1. Parse the reason — it tells you what remains
+```bash
+# Step 2: Parse the evaluator's response
+bash ~/.cursor/skills/goal/goal-eval.sh parse-result "<subagent response>"
+# Outputs: VERDICT=YES/NO, REASON=...
+# Exit code: 0 for YES, 1 for NO/UNCLEAR
+```
+
+**If YES** (exit 0):
+```bash
+# Step 3: Signal and mark done
+bash ~/.cursor/skills/goal/goal-eval.sh signal
+bash ~/.cursor/skills/goal/goal-manage.sh done     # Rejects if no signal — enforced by harness
+```
+Then report the achievement to the user.
+
+**If NO** (exit 1):
+1. Read the REASON — it tells you what remains
 2. Continue working toward the goal in the same turn
-3. After more work, evaluate again
-4. Do NOT end the turn while the goal is still pursuing
-
-### Checklist Before Marking Done
-
-Before you call `goal-manage.sh done`, verify ALL of these **in the current
-goal cycle** (since the last `goal-manage.sh create`):
-- [ ] A `Task(subagent_type: "goal", readonly: true)` was spawned with the evaluation prompt
-- [ ] The subagent returned a response starting with "YES:"
-- [ ] You are NOT self-assessing (your own judgment does not count)
-- [ ] The evaluator was spawned AFTER your last work, not carried over from a previous cycle
-
-If any of these are false, DO NOT mark done. Spawn the evaluator first.
-An evaluator from a previous goal cycle does NOT count.
+3. After more work, evaluate again (back to step 1)
 
 ### When to Evaluate
 
@@ -198,34 +140,18 @@ Default budget is 20 turns. When the budget is hit:
 3. Summarize progress, list what remains, and stop
 
 Users can customize: `/goal "condition" --budget 50`
+or naturally: `/goal fix the bug, stop after 10 turns`
 
 ## Writing Good Conditions
 
-Conditions work best when they describe a verifiable end state. Write them
-like you'd tell a colleague "keep going until...":
+Conditions work best when they describe a verifiable end state:
 
 ```
 ✓ all tests in test/auth pass and the lint step is clean
 ✓ every call site of the old API has been migrated and the build succeeds
-✓ CHANGELOG.md has an entry for every PR merged this week
 ✓ no ESLint errors in src/, stop after 15 turns
-✓ the login flow works end-to-end with the new auth provider
-```
-
-Bad conditions are vague or have no observable proof:
-
-```
-✗ the code is clean
-✗ implement the feature
-✗ fix the bug
-```
-
-You can include the check method and budget inline:
-
-```
-/goal all tests pass, verified by npm test, stop after 20 turns
-/goal split utils.ts into focused modules until each is under 200 lines
-/goal drain the P1 issue backlog until the queue is empty
+✗ the code is clean          (vague, no observable proof)
+✗ implement the feature       (no completion criteria)
 ```
 
 ## State File
@@ -250,24 +176,11 @@ Status values: `pursuing`, `paused`, `achieved`, `budget-limited`
 
 ## Followup Message Format
 
-When the stop hook auto-continues you, you'll receive a user message like:
+When the stop hook auto-continues you, you'll receive:
 
 ```
 [GOAL] Turn 3/20 (17 remaining). Continue working toward: all tests pass
 ```
 
-or with validation results:
-
-```
-[GOAL] Turn 5/20. Validation FAILED (exit 1): Tests: 2 failed. Continue working toward: all tests pass
-```
-
-or on budget limit:
-
-```
-[GOAL BUDGET] Turn limit (20) reached. Wrap up current work and summarize progress toward: all tests pass
-```
-
-When you see `[GOAL]` prefix in a user message, you know you're in an
-auto-continued turn. Resume working toward the condition immediately.
-Do not re-introduce yourself or ask what to do.
+When you see `[GOAL]` prefix, you're in an auto-continued turn.
+Resume working toward the condition immediately.
