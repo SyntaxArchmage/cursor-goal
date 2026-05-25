@@ -171,10 +171,17 @@ const STATUS_GROUP_ORDER: WorkloadStatus[] = ['partial', 'fail', 'pass', 'untest
 export default function Health() {
   const testedWorkloads = workloads.filter((w) => w.status !== 'untested').length
   const totalWorkloads = workloads.length
+  const passCount = workloads.filter((w) => w.status === 'pass').length
+  const partialCount = workloads.filter((w) => w.status === 'partial').length
+  const failCount = workloads.filter((w) => w.status === 'fail').length
   const verifiedPlatforms = platformHealth.filter((p) => p.tested).length
   const totalPlatforms = platformHealth.length
   const coveredFeatures = features.filter((f) => f.workloadCount > 0)
   const uncoveredFeatures = features.filter((f) => f.workloadCount === 0)
+
+  const overallColor = failCount > 0 ? '#ef4444' : partialCount > 0 ? '#eab308' : passCount > 0 ? '#10b981' : '#6b7280'
+  const overallLabel = failCount > 0 ? 'Issues Found' : partialCount > 0 ? 'Early Stage' : passCount > 0 ? 'Passing' : 'No Data'
+  const overallTextColor = failCount > 0 ? 'text-red-400' : partialCount > 0 ? 'text-yellow-400' : passCount > 0 ? 'text-[var(--color-emerald)]' : 'text-[var(--color-muted)]'
 
   const workloadsByStatus = STATUS_GROUP_ORDER.reduce(
     (acc, status) => {
@@ -216,12 +223,14 @@ export default function Health() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
         >
           <HeroStatCard label="Overall Status">
-            <StatusRing color="#eab308" size={64} strokeWidth={5}>
-              <span className="text-lg">⚠</span>
+            <StatusRing color={overallColor} size={64} strokeWidth={5}>
+              <span className="text-lg">{failCount > 0 ? '✕' : passCount > 0 && partialCount === 0 && failCount === 0 ? '✓' : '⚠'}</span>
             </StatusRing>
             <div>
-              <div className="text-xl font-bold text-yellow-400">Early Stage</div>
-              <div className="text-xs text-[var(--color-muted)] mt-0.5">0 pass · 3 partial</div>
+              <div className={`text-xl font-bold ${overallTextColor}`}>{overallLabel}</div>
+              <div className="text-xs text-[var(--color-muted)] mt-0.5">
+                {passCount} pass · {partialCount} partial{failCount > 0 ? ` · ${failCount} fail` : ''}
+              </div>
             </div>
           </HeroStatCard>
 
