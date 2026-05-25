@@ -47,6 +47,41 @@ export default function Docs() {
           autonomous goal loops for Cursor IDE.
         </p>
 
+        <Section title="Harness Scripts">
+          <p className="text-gray-300 mb-6 leading-relaxed">
+            Rules are enforced by programs, not prose. The agent calls these scripts via Shell —
+            the scripts enforce correctness.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl overflow-hidden">
+              <thead className="bg-[var(--color-surface)]">
+                <tr>
+                  <th className="text-left p-3 text-[var(--color-muted)]">Script</th>
+                  <th className="text-left p-3 text-[var(--color-muted)]">Description</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-300">
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">goal-parse.sh</td>
+                  <td className="p-3">Extracts condition, validation command, and turn budget from natural language input</td>
+                </tr>
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">goal-manage.sh</td>
+                  <td className="p-3">State lifecycle (create, status, pause, resume, clear, done). <code>done</code> rejects (exit 1) if no evaluator signal exists</td>
+                </tr>
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">goal-eval.sh</td>
+                  <td className="p-3">Evaluator harness — generates evaluator prompt, parses YES/NO results, manages goal-eval-done signal</td>
+                </tr>
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">goal-stop.sh</td>
+                  <td className="p-3">Stop hook — auto-continues between turns when goal is still active, enforces turn budget</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Section>
+
         <Section title="How It Works">
           <p className="text-gray-300 mb-6 leading-relaxed">
             cursor-goal uses a two-layer architecture: in-turn subagent evaluation for fast feedback,
@@ -63,10 +98,12 @@ export default function Docs() {
               </p>
               <CodeBlock title="Evaluation cycle">{`Work → run validation (if --test)
   ↓
-Task(readonly: true) "Is condition met?"
+goal-eval.sh prompt → generates evaluator prompt
+Agent spawns readonly evaluator subagent
   ↓
-YES: <reason>  → goal-manage.sh done
-NO:  <reason>  → keep working`}</CodeBlock>
+goal-eval.sh parse-result
+  YES: goal-eval.sh signal → goal-manage.sh done
+  NO:  <reason> → keep working`}</CodeBlock>
             </Card>
             <Card>
               <h3 className="text-lg font-semibold mb-3 text-[var(--color-emerald)]">
@@ -212,6 +249,11 @@ Still pursuing?
             </table>
           </div>
           <p className="text-[var(--color-muted)] text-sm mt-4">
+            <code className="text-[var(--color-accent-light)]">goal-parse.sh</code> extracts{' '}
+            <code>--test</code> and <code>--budget</code> from natural language when flags are omitted
+            (e.g. &ldquo;verified by npm test&rdquo;, &ldquo;stop after 10 turns&rdquo;).
+          </p>
+          <p className="text-[var(--color-muted)] text-sm mt-4">
             State is stored at <code className="text-[var(--color-accent-light)]">~/.durable-request/data/goal.json</code>.
             Install scripts copy hooks to <code className="text-[var(--color-accent-light)]">~/.cursor/skills/goal/</code>.
           </p>
@@ -296,6 +338,50 @@ Still pursuing?
           <p className="text-[var(--color-muted)] text-sm">
             Budget can be set via <code>--budget N</code> flag or inline: &ldquo;stop after 10 turns&rdquo;.
             Default is 20 turns.
+          </p>
+        </Section>
+
+        <Section title="Platform Support">
+          <div className="overflow-x-auto mb-6">
+            <table className="w-full text-sm bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl overflow-hidden">
+              <thead className="bg-[var(--color-surface)]">
+                <tr>
+                  <th className="text-left p-3 text-[var(--color-muted)]">Platform</th>
+                  <th className="text-left p-3 text-[var(--color-muted)]">Status</th>
+                  <th className="text-left p-3 text-[var(--color-muted)]">Agent Definition</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-300">
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3">Cursor IDE</td>
+                  <td className="p-3 text-[var(--color-emerald)]">Tested</td>
+                  <td className="p-3 font-[var(--font-mono)] text-xs">.cursor/agents/goalKeeper.md</td>
+                </tr>
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3">Cursor CLI</td>
+                  <td className="p-3 text-[var(--color-muted)]">Untested</td>
+                  <td className="p-3 font-[var(--font-mono)] text-xs">.cursor/agents/goalKeeper.md</td>
+                </tr>
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3">Claude Code</td>
+                  <td className="p-3 text-[var(--color-muted)]">Untested</td>
+                  <td className="p-3 font-[var(--font-mono)] text-xs">.claude/agents/goalKeeper.md</td>
+                </tr>
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3">Copilot IDE</td>
+                  <td className="p-3 text-[var(--color-muted)]">Untested</td>
+                  <td className="p-3 font-[var(--font-mono)] text-xs">.github/agents/goal-evaluator.md</td>
+                </tr>
+                <tr className="border-t border-[var(--color-border)]">
+                  <td className="p-3">OpenCode</td>
+                  <td className="p-3 text-[var(--color-muted)]">Untested</td>
+                  <td className="p-3 font-[var(--font-mono)] text-xs">opencode.json (inline)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-[var(--color-muted)] text-sm">
+            Only Cursor IDE has been end-to-end tested. Other platforms are supported via agent definitions but untested.
           </p>
         </Section>
 

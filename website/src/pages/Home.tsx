@@ -35,8 +35,8 @@ export default function Home() {
               Set a condition. Walk away. Come back to finished work.
             </p>
             <p className="text-[var(--color-muted)] mb-8 max-w-lg mx-auto">
-              Equivalent to Claude Code's <code className="text-[var(--color-accent-light)]">/goal</code> — but for Cursor.
-              First open-source implementation with subagent evaluation.
+              Autonomous goal loop for AI coding agents. Works with Cursor, Claude Code, Copilot, and more.
+              First open-source implementation with harness-enforced subagent evaluation.
             </p>
           </motion.div>
 
@@ -77,6 +77,7 @@ export default function Home() {
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Auto-continuation via stop hook</li>
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Subagent evaluator — separate model judges completion</li>
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Turn budgets with automatic wrap-up</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Harness-enforced rules — goal-manage.sh done rejects if no evaluator ran</li>
             </ul>
           </motion.div>
         </div>
@@ -95,6 +96,8 @@ export default function Home() {
             <FeatureCard icon="📊" title="Turn Budgets" desc="Set --budget to cap turns. Agent gets budget-limited warnings and wraps up cleanly when exhausted." />
             <FeatureCard icon="⏸️" title="Pause & Resume" desc="Pause auto-continuation, do something else, resume when ready. Full lifecycle control." />
             <FeatureCard icon="🔗" title="durable-request Compatible" desc="When combined with durable-request, goal completion triggers /deep-sleep — keeping your session alive." />
+            <FeatureCard icon="⚙️" title="Harness-Driven" desc="Rules are programs, not prose. goal-eval.sh, goal-parse.sh, and goal-manage.sh enforce correctness — the agent can't skip evaluation or self-mark done." />
+            <FeatureCard icon="🌐" title="Cross-Platform" desc="Works on Cursor IDE (tested), Cursor CLI, Claude Code, Copilot IDE, and OpenCode — via platform-specific agent definitions." />
           </div>
         </div>
       </section>
@@ -110,13 +113,14 @@ export default function Home() {
               <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 text-[var(--color-accent-light)]">Layer 1: In-Turn Evaluation</h3>
                 <p className="text-[var(--color-muted)] text-sm mb-4">Agent spawns a readonly subagent to evaluate the goal condition within the same turn.</p>
-                <CodeBlock title="Subagent evaluation">{`Agent works → thinks it might be done
+                <CodeBlock title="Harness evaluation">{`Agent works → runs tests
   ↓
-Task(readonly: true)
-  "Is the condition met?"
+goal-eval.sh prompt → generates evaluator prompt
+Spawn readonly evaluator subagent
   ↓
-  YES: tests pass, lint clean → mark done
-  NO: 2 tests still failing  → continue`}</CodeBlock>
+goal-eval.sh parse-result → YES/NO
+  YES: goal-eval.sh signal → goal-manage.sh done
+  NO:  keep working`}</CodeBlock>
               </div>
             </motion.div>
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
@@ -150,6 +154,8 @@ Goal still active?
                   <tr className="border-t border-[var(--color-border)]"><td className="p-3">Eval timing</td><td className="p-3">Between turns only</td><td className="p-3 text-[var(--color-emerald)]">Within turn + between</td></tr>
                   <tr className="border-t border-[var(--color-border)]"><td className="p-3">Validation</td><td className="p-3">Transcript text</td><td className="p-3 text-[var(--color-emerald)]">Transcript + cmd output</td></tr>
                   <tr className="border-t border-[var(--color-border)]"><td className="p-3">Loop guard</td><td className="p-3">stop_hook_active</td><td className="p-3">loop_count + turn_budget</td></tr>
+                  <tr className="border-t border-[var(--color-border)]"><td className="p-3">Rule enforcement</td><td className="p-3">Prose in CLAUDE.md</td><td className="p-3 text-[var(--color-emerald)]">Harness scripts (programmatic)</td></tr>
+                  <tr className="border-t border-[var(--color-border)]"><td className="p-3">Self-assessment guard</td><td className="p-3">None</td><td className="p-3 text-[var(--color-emerald)]">goal-eval-done signal file + done rejection</td></tr>
                 </tbody>
               </table>
             </div>
@@ -163,20 +169,20 @@ Goal still active?
           <h2 className="text-3xl font-bold mb-8">
             <span className="text-gradient">Get Started</span>
           </h2>
-          <CodeBlock title="Terminal">{`git clone https://github.com/SyntaxArchmage/cursor-goal.git
-cd cursor-goal
-mkdir -p ~/.cursor/agents ~/.cursor/skills/goal
-cp .cursor/agents/goal.md ~/.cursor/agents/
-cp .cursor/skills/goal/*.sh ~/.cursor/skills/goal/
-chmod +x ~/.cursor/skills/goal/*.sh`}</CodeBlock>
+          <CodeBlock title="Install">{`# Tell your agent:
+Install the /goal skill from https://github.com/SyntaxArchmage/cursor-goal
+
+# Or automated:
+git clone https://github.com/SyntaxArchmage/cursor-goal.git
+cd cursor-goal && ./install-goal.sh`}</CodeBlock>
           <div className="mt-8 grid md:grid-cols-3 gap-4 text-sm">
             <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4">
               <div className="text-[var(--color-accent-light)] font-semibold mb-1">Requirements</div>
-              <div className="text-[var(--color-muted)]">Cursor IDE 1.7+, jq, bash 4+</div>
+              <div className="text-[var(--color-muted)]">jq, bash 4+</div>
             </div>
             <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4">
-              <div className="text-[var(--color-emerald)] font-semibold mb-1">Standalone</div>
-              <div className="text-[var(--color-muted)]">Works with any Cursor project</div>
+              <div className="text-[var(--color-emerald)] font-semibold mb-1">Cross-Platform</div>
+              <div className="text-[var(--color-muted)]">Cursor, Claude Code, Copilot, OpenCode</div>
             </div>
             <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4">
               <div className="text-[var(--color-accent-light)] font-semibold mb-1">Composable</div>
