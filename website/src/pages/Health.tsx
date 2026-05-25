@@ -117,56 +117,6 @@ function HeroStatCard({
   )
 }
 
-function WorkloadCard({ id, name, status }: { id: string; name: string; status: WorkloadStatus }) {
-  const badgeStyles: Record<WorkloadStatus, string> = {
-    pass: 'bg-emerald-500/10 text-[var(--color-emerald)]',
-    fail: 'bg-red-500/10 text-red-400',
-    partial: 'bg-yellow-500/10 text-yellow-400',
-    untested: 'bg-gray-500/10 text-[var(--color-muted)]',
-  }
-
-  return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-3 hover:border-[var(--color-accent)]/40 transition-colors">
-      <div className="flex items-center gap-2 mb-1.5">
-        <span className="text-[10px] font-[var(--font-mono)] bg-[var(--color-surface)] text-[var(--color-accent-light)] px-1.5 py-0.5 rounded">
-          #{id}
-        </span>
-        <StatusDot status={status} />
-      </div>
-      <div className="text-sm text-gray-200 leading-snug mb-2 line-clamp-2">{name}</div>
-      <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${badgeStyles[status]}`}>
-        {statusLabel(status)}
-      </span>
-    </div>
-  )
-}
-
-function CoverageBar({ count, total, variant = 'default' }: { count: number; total: number; variant?: 'default' | 'covered' }) {
-  const pct = total > 0 ? (count / total) * 100 : 0
-  const barColor =
-    variant === 'covered'
-      ? 'bg-[var(--color-emerald)]'
-      : pct >= 75
-        ? 'bg-[var(--color-emerald)]'
-        : pct >= 40
-          ? 'bg-yellow-500'
-          : pct > 0
-            ? 'bg-orange-500'
-            : 'bg-gray-600'
-
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-2 bg-[var(--color-surface)] rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-xs text-[var(--color-muted)] w-16 text-right font-[var(--font-mono)]">
-        {count}/{total}
-      </span>
-    </div>
-  )
-}
-
-const STATUS_GROUP_ORDER: WorkloadStatus[] = ['partial', 'fail', 'pass', 'untested']
 
 export default function Health() {
   const testedWorkloads = workloads.filter((w) => w.status !== 'untested').length
@@ -177,20 +127,10 @@ export default function Health() {
   const verifiedPlatforms = platformHealth.filter((p) => p.tested).length
   const totalPlatforms = platformHealth.length
   const coveredFeatures = features.filter((f) => f.workloadCount > 0)
-  const uncoveredFeatures = features.filter((f) => f.workloadCount === 0)
 
   const overallColor = failCount > 0 ? '#ef4444' : partialCount > 0 ? '#eab308' : passCount > 0 ? '#10b981' : '#6b7280'
   const overallLabel = failCount > 0 ? 'Issues Found' : partialCount > 0 ? 'Early Stage' : passCount > 0 ? 'Passing' : 'No Data'
   const overallTextColor = failCount > 0 ? 'text-red-400' : partialCount > 0 ? 'text-yellow-400' : passCount > 0 ? 'text-[var(--color-emerald)]' : 'text-[var(--color-muted)]'
-
-  const workloadsByStatus = STATUS_GROUP_ORDER.reduce(
-    (acc, status) => {
-      const group = workloads.filter((w) => w.status === status)
-      if (group.length > 0) acc.push({ status, items: group })
-      return acc
-    },
-    [] as { status: WorkloadStatus; items: typeof workloads }[],
-  )
 
   const matrixLookup = new Map(
     platformWorkloadMatrix.map((entry) => [`${entry.platform}:${entry.workloadId}`, entry.status]),
@@ -366,98 +306,7 @@ export default function Health() {
           </div>
         </motion.section>
 
-        {/* Platform × Workload Matrix */}
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeUp}
-          custom={0}
-          className="mb-12"
-        >
-          <h2 className="text-2xl font-bold mb-1">
-            <span className="text-gradient">Platform × Workload Matrix</span>
-          </h2>
-          <p className="text-sm text-[var(--color-muted)] mb-4">
-            Tested workloads by platform.
-          </p>
-          <div className="overflow-x-auto rounded-xl border border-[var(--color-border)]">
-            <table className="w-full min-w-max text-sm bg-[var(--color-card)]">
-              <thead>
-                <tr className="border-b border-[var(--color-border)]">
-                  <th className="sticky left-0 z-10 bg-[var(--color-card)] text-left text-xs font-medium text-[var(--color-muted)] px-3 py-2 min-w-[7rem]">
-                    Platform
-                  </th>
-                  {workloads.map((w) => (
-                    <th
-                      key={w.id}
-                      className="px-1 py-2 text-center text-[10px] font-[var(--font-mono)] text-[var(--color-muted)] font-normal whitespace-nowrap"
-                      title={w.name}
-                    >
-                      <span className="inline-block -rotate-45 origin-center translate-y-1">
-                        #{w.id}
-                      </span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {platformHealth.map((platform) => (
-                  <tr
-                    key={platform.name}
-                    className="border-b border-[var(--color-border)] last:border-b-0"
-                  >
-                    <td className="sticky left-0 z-10 bg-[var(--color-card)] px-3 py-1.5 text-xs text-gray-300 whitespace-nowrap font-medium">
-                      {platform.name}
-                    </td>
-                    {workloads.map((w) => {
-                      const status = matrixLookup.get(`${platform.name}:${w.id}`) ?? 'untested'
-                      return (
-                        <td key={w.id} className="px-1 py-1.5 text-center">
-                          <StatusDot status={status} />
-                        </td>
-                      )
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.section>
-
-        {/* Workload Status Grid */}
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeUp}
-          custom={0}
-          className="mb-12"
-        >
-          <h2 className="text-2xl font-bold mb-4">
-            <span className="text-gradient">Workload Status</span>
-          </h2>
-          <div className="space-y-8">
-            {workloadsByStatus.map(({ status, items }) => (
-              <div key={status}>
-                <div className="flex items-center gap-2 mb-3">
-                  <StatusDot status={status} />
-                  <span className="text-sm font-medium text-gray-300">
-                    {statusLabel(status)}
-                  </span>
-                  <span className="text-xs text-[var(--color-muted)]">({items.length})</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {items.map((w) => (
-                    <WorkloadCard key={w.id} id={w.id} name={w.name} status={w.status} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* Feature Coverage */}
+        {/* Workload × Platform Matrix */}
         <motion.section
           initial="hidden"
           whileInView="visible"
@@ -467,57 +316,72 @@ export default function Health() {
           className="mb-10"
         >
           <h2 className="text-2xl font-bold mb-4">
-            <span className="text-gradient">Feature Coverage</span>
+            <span className="text-gradient">Support Matrix</span>
           </h2>
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-2 h-2 rounded-full bg-[var(--color-emerald)]" />
-                <h3 className="text-sm font-semibold text-gray-300">
-                  Covered ({coveredFeatures.length})
-                </h3>
-              </div>
-              <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl divide-y divide-[var(--color-border)]">
-                {coveredFeatures.map((f) => (
-                  <div key={f.id} className="p-4">
-                    <div className="flex items-start gap-2 mb-2">
-                      <span className="font-[var(--font-mono)] text-[var(--color-accent-light)] text-sm shrink-0">
-                        {f.id}
-                      </span>
-                      <span className="text-sm text-gray-300">{f.name}</span>
-                    </div>
-                    <CoverageBar count={f.workloadCount} total={f.totalWorkloads} variant="covered" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                <h3 className="text-sm font-semibold text-gray-300">
-                  Needs Coverage ({uncoveredFeatures.length})
-                </h3>
-              </div>
-              <div className="bg-[var(--color-card)] border border-red-500/20 rounded-xl divide-y divide-[var(--color-border)]">
-                {uncoveredFeatures.map((f) => (
-                  <div key={f.id} className="p-4 flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center text-xs shrink-0 mt-0.5">
-                      ✕
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-[var(--font-mono)] text-[var(--color-accent-light)] text-sm">
-                          {f.id}
-                        </span>
-                        <span className="text-sm text-gray-300">{f.name}</span>
-                      </div>
-                      <div className="text-xs text-[var(--color-muted)] mt-1">Not exercised yet</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="overflow-x-auto rounded-xl border border-[var(--color-border)]">
+            <table className="w-full text-sm bg-[var(--color-card)]">
+              <thead>
+                <tr className="border-b border-[var(--color-border)]">
+                  <th className="sticky left-0 z-10 bg-[var(--color-surface)] text-left text-xs font-medium text-[var(--color-muted)] px-4 py-3 min-w-[14rem]">
+                    Workload
+                  </th>
+                  <th className="text-left text-xs font-medium text-[var(--color-muted)] px-3 py-3">
+                    Features
+                  </th>
+                  {platformHealth.map((p) => (
+                    <th
+                      key={p.name}
+                      className="px-3 py-3 text-center text-xs font-medium text-[var(--color-muted)] whitespace-nowrap"
+                    >
+                      {p.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {workloads.map((w) => {
+                  const featureNames = w.features.map((fid) => {
+                    const f = features.find((feat) => feat.id === fid)
+                    return f ? f.name : fid
+                  })
+                  return (
+                    <tr
+                      key={w.id}
+                      className="border-b border-[var(--color-border)] last:border-b-0 hover:bg-[var(--color-surface)]/30 transition-colors"
+                    >
+                      <td className="sticky left-0 z-10 bg-[var(--color-card)] px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-[var(--font-mono)] bg-[var(--color-surface)] text-[var(--color-accent-light)] px-1.5 py-0.5 rounded shrink-0">
+                            #{w.id}
+                          </span>
+                          <span className="text-sm text-gray-200">{w.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {featureNames.map((name, i) => (
+                            <span
+                              key={i}
+                              className="text-[10px] bg-[var(--color-surface)] text-[var(--color-muted)] px-1.5 py-0.5 rounded leading-tight"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      {platformHealth.map((p) => {
+                        const status = matrixLookup.get(`${p.name}:${w.id}`) ?? 'untested'
+                        return (
+                          <td key={p.name} className="px-3 py-3 text-center">
+                            <StatusDot status={status} />
+                          </td>
+                        )
+                      })}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         </motion.section>
 
