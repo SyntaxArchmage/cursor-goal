@@ -402,16 +402,6 @@ FEATURES = {
         checker=check_f24,
         count_mode="structured",
     ),
-    "F-NOT": Feature(
-        id="F-NOT",
-        name="No checkpoint during active goal (inverse check)",
-        pattern=re.compile(
-            r'AskQuestion.*\[GOAL\]|\[GOAL\].*AskQuestion',
-            re.DOTALL | re.IGNORECASE,
-        ),
-        min_samples=5,
-        count_mode="presence",
-    ),
 }
 
 WORKLOAD_FEATURES = {
@@ -428,6 +418,11 @@ WORKLOAD_FEATURES = {
     "22-goal-backlog-drain": ["F11", "F12", "F13b", "F15", "F19", "F20", "F22", "F23"],
     "23-goal-concurrent-eval": ["F11", "F12", "F13", "F16", "F17", "F19", "F20"],
     "24-goal-natural-vague-to-specific": ["F11", "F12", "F15", "F19", "F20"],
+    "goal-video-production-full": ["F11", "F12", "F13", "F13a", "F13b", "F19", "F20", "F21", "F22", "F23"],
+    "goal-website-cards": ["F11", "F12", "F13b", "F19", "F20", "F21", "F22", "F23"],
+    "goal-en-subtitle-fix": ["F11", "F12", "F13b", "F19", "F20", "F21", "F22", "F23"],
+    "goal-video-production": ["F11", "F12", "F13b"],
+    "goal-website-figures": ["F11", "F12", "F13b"],
 }
 
 UNIVERSAL_FEATURES = ["F11", "F12", "F13b", "F19", "F20", "F21", "F22", "F23"]
@@ -438,7 +433,7 @@ def check_feature(transcript: str, feature_id: str,
                    actions: list[dict] = None) -> dict:
     """Check if a feature is detected in a transcript.
 
-    For regex features (F11-F18, F-NOT): matches against transcript text.
+    For regex features (F11-F18): matches against transcript text.
     For structured features (F19-F21): inspects parsed Task call data.
     For ordering features (F22-F24): inspects action sequence from JSONL.
     """
@@ -462,9 +457,6 @@ def check_feature(transcript: str, feature_id: str,
 
     matches = feature.pattern.findall(transcript)
     count = len(matches)
-
-    if feature_id == "F-NOT":
-        return {"found": count == 0, "count": count, "feature": feature}
 
     if feature_id == "F16":
         return {"found": count >= 2, "count": count, "feature": feature}

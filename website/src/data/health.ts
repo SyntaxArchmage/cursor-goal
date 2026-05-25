@@ -40,9 +40,9 @@ export const workloads: Workload[] = [
   {
     id: '12',
     name: 'Goal with Validation Command',
-    status: 'untested',
+    status: 'partial',
     features: ['F11', 'F12', 'F13', 'F13a', 'F13b', 'F19', 'F20', 'F21', 'F22', 'F23'],
-    lastRun: '—',
+    lastRun: '2026-05-25',
   },
   {
     id: '13',
@@ -131,21 +131,21 @@ export const workloads: Workload[] = [
 ]
 
 export const features: Feature[] = [
-  { id: 'F11', name: 'Goal state initialization', workloadCount: 3, totalWorkloads: 13 },
-  { id: 'F12', name: 'In-turn subagent evaluation', workloadCount: 3, totalWorkloads: 13 },
-  { id: 'F13', name: 'Stop hook auto-continuation', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F13a', name: 'Validation command execution', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F13b', name: 'Goal completion marking', workloadCount: 3, totalWorkloads: 13 },
+  { id: 'F11', name: 'Goal state initialization', workloadCount: 4, totalWorkloads: 13 },
+  { id: 'F12', name: 'In-turn subagent evaluation', workloadCount: 4, totalWorkloads: 13 },
+  { id: 'F13', name: 'Stop hook auto-continuation', workloadCount: 1, totalWorkloads: 13 },
+  { id: 'F13a', name: 'Validation command execution', workloadCount: 1, totalWorkloads: 13 },
+  { id: 'F13b', name: 'Goal completion marking', workloadCount: 4, totalWorkloads: 13 },
   { id: 'F14', name: 'Pause/resume lifecycle', workloadCount: 0, totalWorkloads: 13 },
   { id: 'F15', name: 'Natural language parsing', workloadCount: 0, totalWorkloads: 13 },
   { id: 'F16', name: 'Multi-cycle evaluation', workloadCount: 0, totalWorkloads: 13 },
   { id: 'F17', name: 'Budget inline parsing', workloadCount: 0, totalWorkloads: 13 },
   { id: 'F18', name: 'Goal clear/cancel', workloadCount: 0, totalWorkloads: 13 },
   { id: 'F19', name: 'Correct evaluator subagent_type', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F20', name: 'Evaluator runs readonly', workloadCount: 1, totalWorkloads: 13 },
-  { id: 'F21', name: 'Evaluator prompt contains condition', workloadCount: 1, totalWorkloads: 13 },
-  { id: 'F22', name: 'No self-assessment', workloadCount: 1, totalWorkloads: 13 },
-  { id: 'F23', name: 'Goal has non-empty condition', workloadCount: 1, totalWorkloads: 13 },
+  { id: 'F20', name: 'Evaluator runs readonly', workloadCount: 3, totalWorkloads: 13 },
+  { id: 'F21', name: 'Evaluator prompt contains condition', workloadCount: 3, totalWorkloads: 13 },
+  { id: 'F22', name: 'No self-assessment', workloadCount: 2, totalWorkloads: 13 },
+  { id: 'F23', name: 'Goal has non-empty condition', workloadCount: 3, totalWorkloads: 13 },
   { id: 'F24', name: 'Done follows evaluator', workloadCount: 0, totalWorkloads: 13 },
 ]
 
@@ -169,11 +169,26 @@ export const platformHealth: PlatformHealth[] = [
 ]
 
 export const platformWorkloadMatrix: PlatformWorkloadEntry[] = [
+  // Cursor IDE — 6 samples analyzed across 4 workloads
+  {
+    platform: 'Cursor IDE',
+    workloadId: '12',
+    status: 'partial',
+    sample: 'goal-video-production-full.jsonl',
+    featuresDetected: ['F11', 'F12', 'F13', 'F13a', 'F13b', 'F20', 'F21', 'F23'],
+  },
   {
     platform: 'Cursor IDE',
     workloadId: '14',
     status: 'partial',
     sample: 'goal-en-subtitle-fix.jsonl',
+    featuresDetected: ['F11', 'F12', 'F13b', 'F20', 'F21', 'F22', 'F23'],
+  },
+  {
+    platform: 'Cursor IDE',
+    workloadId: '14',
+    status: 'partial',
+    sample: 'goal-website-cards.jsonl',
     featuresDetected: ['F11', 'F12', 'F13b', 'F20', 'F21', 'F22', 'F23'],
   },
   {
