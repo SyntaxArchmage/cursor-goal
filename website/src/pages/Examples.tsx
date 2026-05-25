@@ -12,32 +12,32 @@ const examples: Example[] = [
   {
     prompt: 'all tests in test/auth pass and the lint step is clean',
     description:
-      'The agent turns your goal into a checklist, runs the auth test suite and linter, and fixes whatever fails. It keeps going until both checks pass — no need to babysit each fix.',
+      'Runs auth tests and linter, fixes failures, and loops until both pass.',
   },
   {
     prompt: 'migrate every API call to v2 until the build succeeds, stop after 20 turns',
     description:
-      'The agent finds every legacy API call, migrates them to v2 in batches, and rebuilds after each batch. It stops when the build succeeds or hits your 20-turn budget.',
+      'Finds legacy calls, migrates to v2 in batches, rebuilds after each. Stops on success or at budget.',
   },
   {
     prompt: 'every exported function has JSDoc documentation',
     description:
-      'The agent scans for exported functions missing docs and adds JSDoc to each one. It continues until every export is documented.',
+      'Scans exports, adds JSDoc. Continues until every function is documented.',
   },
   {
     prompt: 'split monolith.py into focused modules until each is under 100 lines',
     description:
-      'The agent breaks monolith.py into focused modules by responsibility, moving code until each file stays under 100 lines. It keeps splitting until the size constraint is met.',
+      'Splits by responsibility. Keeps going until each file is under 100 lines.',
   },
   {
     prompt: 'fix the failing CI, verified by npm test',
     description:
-      'The agent runs npm test, diagnoses failures, and applies fixes. It re-runs the suite until everything passes.',
+      'Runs tests, diagnoses failures, fixes. Loops until green.',
   },
   {
     prompt: 'drain the P1 issue backlog until the queue is empty',
     description:
-      'The agent works through P1 issues in priority order, fixing and verifying each one. It stops when the backlog is empty.',
+      'Works through P1s in order, fixing each. Stops when queue is empty.',
   },
 ]
 

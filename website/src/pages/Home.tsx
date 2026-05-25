@@ -59,10 +59,10 @@ export default function Home() {
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             <h2 className="text-2xl font-bold mb-6 text-red-400">Without cursor-goal</h2>
             <ul className="space-y-3 text-[var(--color-muted)]">
-              <li className="flex gap-3"><span className="text-red-400">✗</span> Agent stops after one turn — you re-prompt manually</li>
-              <li className="flex gap-3"><span className="text-red-400">✗</span> No persistent objective — agent forgets the goal</li>
-              <li className="flex gap-3"><span className="text-red-400">✗</span> No budget tracking — can't limit or monitor turns</li>
-              <li className="flex gap-3"><span className="text-red-400">✗</span> Work halts mid-task without wrap-up</li>
+              <li className="flex gap-3"><span className="text-red-400">✗</span> Agent stops after one turn</li>
+              <li className="flex gap-3"><span className="text-red-400">✗</span> No persistent objective</li>
+              <li className="flex gap-3"><span className="text-red-400">✗</span> No budget tracking</li>
+              <li className="flex gap-3"><span className="text-red-400">✗</span> Work halts mid-task</li>
             </ul>
           </motion.div>
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
@@ -70,7 +70,7 @@ export default function Home() {
             <ul className="space-y-3 text-gray-300">
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Goal persists across agent turns</li>
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Clean wrap-up when budget runs out</li>
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Natural language — just describe done</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Natural language — describe done</li>
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Pause, resume, clear anytime</li>
             </ul>
           </motion.div>
@@ -84,14 +84,14 @@ export default function Home() {
             <span className="text-gradient">Core Features</span>
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <FeatureCard icon="🔄" title="Auto-Continuation" desc="Stop hook auto-continues between turns. No manual re-prompting." />
+            <FeatureCard icon="🔄" title="Auto-Continuation" desc="Auto-continues between turns. No re-prompting." />
             <FeatureCard icon="🧠" title="Subagent Evaluator" desc="Readonly subagent judges completion. No self-assessment." />
             <FeatureCard icon="⚡" title="Validation Commands" desc="--test runs shell commands. Exit 0 = done." />
-            <FeatureCard icon="📊" title="Turn Budgets" desc="--budget caps turns. Clean wrap-up when exhausted." />
-            <FeatureCard icon="⚙️" title="Harness-Driven" desc="Rules are programs, not prose. done rejects without evaluator signal." />
+            <FeatureCard icon="📊" title="Turn Budgets" desc="--budget caps turns. Wraps up cleanly at limit." />
+            <FeatureCard icon="⚙️" title="Harness-Driven" desc="`done` rejects without evaluator signal." />
             <FeatureCard icon="🌐" title="Cross-Platform" desc="Cursor, Claude Code, Copilot, OpenCode." />
-            <FeatureCard icon="⏸️" title="Pause & Resume" desc="Pause, do something else, resume. Full lifecycle control." />
-            <FeatureCard icon="🔓" title="Standalone" desc="No dependencies beyond jq and bash. Works with any project." />
+            <FeatureCard icon="⏸️" title="Pause & Resume" desc="Pause, resume, clear. Full lifecycle." />
+            <FeatureCard icon="🔓" title="Standalone" desc="jq + bash. Works with any project." />
           </div>
         </div>
       </section>
@@ -106,7 +106,7 @@ export default function Home() {
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
               <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 text-[var(--color-accent-light)]">Layer 1: In-Turn Evaluation</h3>
-                <p className="text-[var(--color-muted)] text-sm mb-4">Harness generates evaluator prompt, agent spawns subagent, harness parses result.</p>
+                <p className="text-[var(--color-muted)] text-sm mb-4">Harness generates prompt → agent spawns evaluator → harness parses result.</p>
                 <CodeBlock title="Harness evaluation">{`Agent works → runs tests
   ↓
 goal-eval.sh prompt → generates evaluator prompt
@@ -120,7 +120,7 @@ goal-eval.sh parse-result → YES/NO
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
               <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 text-[var(--color-emerald)]">Layer 2: Between-Turn Safety Net</h3>
-                <p className="text-[var(--color-muted)] text-sm mb-4">When a turn ends with the goal active, the stop hook auto-continues.</p>
+                <p className="text-[var(--color-muted)] text-sm mb-4">Stop hook auto-continues when goal is active.</p>
                 <CodeBlock title="goal-stop.sh">{`Turn ends → stop hook reads goal.json
   ↓
 Goal still active?

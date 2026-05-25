@@ -202,7 +202,7 @@ export default function Health() {
             <span className="text-gradient">Health Dashboard</span>
           </h1>
           <p className="text-[var(--color-muted)]">
-            Platform support, workload testing, and feature coverage at a glance.
+            Platform, workload, and feature coverage at a glance.
           </p>
         </div>
 
@@ -370,7 +370,7 @@ export default function Health() {
             <span className="text-gradient">Platform × Workload Matrix</span>
           </h2>
           <p className="text-sm text-[var(--color-muted)] mb-4">
-            Which workloads have been tested on each platform.
+            Tested workloads by platform.
           </p>
           <div className="overflow-x-auto rounded-xl border border-[var(--color-border)]">
             <table className="w-full min-w-max text-sm bg-[var(--color-card)]">
@@ -503,7 +503,7 @@ export default function Health() {
                         </span>
                         <span className="text-sm text-gray-300">{f.name}</span>
                       </div>
-                      <div className="text-xs text-[var(--color-muted)] mt-1">No workloads exercise this feature</div>
+                      <div className="text-xs text-[var(--color-muted)] mt-1">Not exercised yet</div>
                     </div>
                   </div>
                 ))}
@@ -523,16 +523,16 @@ export default function Health() {
         >
           <span className="text-gray-300 font-medium mr-4">Status legend:</span>
           <span className="inline-flex items-center gap-1.5 mr-4">
-            <StatusDot status="pass" /> Pass — all expected features detected
+            <StatusDot status="pass" /> Pass — all features detected
           </span>
           <span className="inline-flex items-center gap-1.5 mr-4">
-            <StatusDot status="fail" /> Fail — feature check failed
+            <StatusDot status="fail" /> Fail — check failed
           </span>
           <span className="inline-flex items-center gap-1.5 mr-4">
-            <StatusDot status="partial" /> Partial — some features passed
+            <StatusDot status="partial" /> Partial — some passed
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <StatusDot status="untested" /> Untested — no transcript analyzed yet
+            <StatusDot status="untested" /> Untested — no data yet
           </span>
         </motion.div>
       </motion.div>

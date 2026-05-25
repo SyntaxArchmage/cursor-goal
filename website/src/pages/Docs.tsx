@@ -68,31 +68,31 @@ Install the /goal skill from https://github.com/SyntaxArchmage/cursor-goal`}</Co
                   <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">
                     /goal &lt;condition&gt;
                   </td>
-                  <td className="p-3">Set goal and immediately start working toward it</td>
+                  <td className="p-3">Set goal and start working</td>
                 </tr>
                 <tr className="border-t border-[var(--color-border)]">
                   <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">
                     /goal status
                   </td>
-                  <td className="p-3">Show current goal state (condition, turns, status)</td>
+                  <td className="p-3">Show current state</td>
                 </tr>
                 <tr className="border-t border-[var(--color-border)]">
                   <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">
                     /goal pause
                   </td>
-                  <td className="p-3">Pause auto-continuation; state is preserved</td>
+                  <td className="p-3">Pause; state preserved</td>
                 </tr>
                 <tr className="border-t border-[var(--color-border)]">
                   <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">
                     /goal resume
                   </td>
-                  <td className="p-3">Resume a paused goal from where it left off</td>
+                  <td className="p-3">Resume from where you left off</td>
                 </tr>
                 <tr className="border-t border-[var(--color-border)]">
                   <td className="p-3 font-[var(--font-mono)] text-[var(--color-accent-light)]">
                     /goal clear
                   </td>
-                  <td className="p-3">Remove goal entirely (aliases: stop, off, reset, cancel)</td>
+                  <td className="p-3">Remove goal (aliases: stop, cancel, reset)</td>
                 </tr>
               </tbody>
             </table>
@@ -105,7 +105,7 @@ Install the /goal skill from https://github.com/SyntaxArchmage/cursor-goal`}</Co
 
         <Section title="Writing Conditions">
           <p className="text-gray-300 mb-6">
-            Describe a verifiable end state — something you can check, not a vague intent.
+            Describe a verifiable end state, not a vague intent.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
