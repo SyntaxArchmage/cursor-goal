@@ -418,11 +418,15 @@ WORKLOAD_FEATURES = {
     "22-goal-backlog-drain": ["F11", "F12", "F13b", "F15", "F19", "F20", "F22", "F23"],
     "23-goal-concurrent-eval": ["F11", "F12", "F13", "F16", "F17", "F19", "F20"],
     "24-goal-natural-vague-to-specific": ["F11", "F12", "F15", "F19", "F20"],
-    "goal-video-production-full": ["F11", "F12", "F13", "F13a", "F13b", "F19", "F20", "F21", "F22", "F23"],
-    "goal-website-cards": ["F11", "F12", "F13b", "F19", "F20", "F21", "F22", "F23"],
-    "goal-en-subtitle-fix": ["F11", "F12", "F13b", "F19", "F20", "F21", "F22", "F23"],
-    "goal-video-production": ["F11", "F12", "F13b"],
-    "goal-website-figures": ["F11", "F12", "F13b"],
+    # Pre-fix JSONL samples: F19 excluded (used generalPurpose before fix)
+    # F22 excluded from video-production-full (known self-assessment in cycles 3-4)
+    "goal-video-production-full.jsonl": ["F11", "F12", "F13", "F13a", "F13b", "F20", "F21", "F23"],
+    "goal-website-cards.jsonl": ["F11", "F12", "F13b", "F20", "F21", "F22", "F23"],
+    "goal-en-subtitle-fix.jsonl": ["F11", "F12", "F13b", "F20", "F21", "F22", "F23"],
+    # Txt samples: regex-only features (no structural analysis)
+    "goal-en-subtitle-fix.txt": ["F11", "F12", "F13b"],
+    "goal-video-production.txt": ["F11", "F12", "F13b"],
+    "goal-website-figures.txt": ["F11", "F12", "F13b"],
 }
 
 UNIVERSAL_FEATURES = ["F11", "F12", "F13b", "F19", "F20", "F21", "F22", "F23"]
@@ -471,7 +475,8 @@ def analyze_transcript(transcript: str, workload_id: str,
 
     Falls back to UNIVERSAL_FEATURES if workload_id isn't in the map.
     """
-    expected = WORKLOAD_FEATURES.get(workload_id, UNIVERSAL_FEATURES)
+    base_id = workload_id.rsplit(".", 1)[0] if "." in workload_id else workload_id
+    expected = WORKLOAD_FEATURES.get(workload_id) or WORKLOAD_FEATURES.get(base_id, UNIVERSAL_FEATURES)
     results = {}
     for fid in expected:
         results[fid] = check_feature(transcript, fid, task_calls, actions)

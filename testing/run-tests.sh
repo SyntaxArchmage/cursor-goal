@@ -29,8 +29,8 @@ FAILED_LIST=""
 for sample in "${SAMPLES_DIR}"/*.txt "${SAMPLES_DIR}"/*.jsonl; do
     [ -f "$sample" ] || continue
     BASENAME=$(basename "$sample")
-    WORKLOAD="${BASENAME%.*}"
-    echo "Testing: $WORKLOAD (${BASENAME##*.})"
+    WORKLOAD="$BASENAME"
+    echo "Testing: $BASENAME"
     RESULT=$(python3 "${SCRIPT_DIR}/scripts/patterns.py" "$sample" "$WORKLOAD" 2>/dev/null) || {
         echo "  SKIP (no matching workload features)"
         continue

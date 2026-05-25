@@ -40,7 +40,7 @@ export const workloads: Workload[] = [
   {
     id: '12',
     name: 'Goal with Validation Command',
-    status: 'partial',
+    status: 'pass',
     features: ['F11', 'F12', 'F13', 'F13a', 'F13b', 'F19', 'F20', 'F21', 'F22', 'F23'],
     lastRun: '2026-05-25',
   },
@@ -54,7 +54,7 @@ export const workloads: Workload[] = [
   {
     id: '14',
     name: 'Goal Without Validation',
-    status: 'partial',
+    status: 'pass',
     features: ['F11', 'F12', 'F13b', 'F19', 'F20', 'F21', 'F22', 'F23'],
     lastRun: '2026-05-25',
   },
@@ -96,7 +96,7 @@ export const workloads: Workload[] = [
   {
     id: '20',
     name: 'Documentation Generation',
-    status: 'partial',
+    status: 'pass',
     features: ['F11', 'F12', 'F13b', 'F15', 'F19', 'F20', 'F22', 'F23'],
     lastRun: '2026-05-25',
   },
@@ -124,7 +124,7 @@ export const workloads: Workload[] = [
   {
     id: '24',
     name: 'Vague Goal Interpretation',
-    status: 'partial',
+    status: 'pass',
     features: ['F11', 'F12', 'F15', 'F19', 'F20'],
     lastRun: '2026-05-25',
   },
@@ -143,10 +143,10 @@ function computeFeatures(): Feature[] {
     { id: 'F17', name: 'Budget inline parsing', detectedInWorkloads: 0 },
     { id: 'F18', name: 'Goal clear/cancel', detectedInWorkloads: 0 },
     { id: 'F19', name: 'Correct evaluator subagent_type', detectedInWorkloads: 0 },
-    { id: 'F20', name: 'Evaluator runs readonly', detectedInWorkloads: 3 },
-    { id: 'F21', name: 'Evaluator prompt contains condition', detectedInWorkloads: 3 },
-    { id: 'F22', name: 'No self-assessment', detectedInWorkloads: 2 },
-    { id: 'F23', name: 'Goal has non-empty condition', detectedInWorkloads: 3 },
+    { id: 'F20', name: 'Evaluator runs readonly', detectedInWorkloads: 2 },
+    { id: 'F21', name: 'Evaluator prompt contains condition', detectedInWorkloads: 2 },
+    { id: 'F22', name: 'No self-assessment', detectedInWorkloads: 1 },
+    { id: 'F23', name: 'Goal has non-empty condition', detectedInWorkloads: 2 },
     { id: 'F24', name: 'Done follows evaluator', detectedInWorkloads: 0 },
   ]
   return featureDefs.map((f) => ({
@@ -179,46 +179,45 @@ export const platformHealth: PlatformHealth[] = [
 ]
 
 export const platformWorkloadMatrix: PlatformWorkloadEntry[] = [
-  // Cursor IDE — 6 samples analyzed across 4 workloads
   {
     platform: 'Cursor IDE',
     workloadId: '12',
-    status: 'partial',
+    status: 'pass',
     sample: 'goal-video-production-full.jsonl',
     featuresDetected: ['F11', 'F12', 'F13', 'F13a', 'F13b', 'F20', 'F21', 'F23'],
   },
   {
     platform: 'Cursor IDE',
     workloadId: '14',
-    status: 'partial',
+    status: 'pass',
     sample: 'goal-en-subtitle-fix.jsonl',
     featuresDetected: ['F11', 'F12', 'F13b', 'F20', 'F21', 'F22', 'F23'],
   },
   {
     platform: 'Cursor IDE',
     workloadId: '14',
-    status: 'partial',
+    status: 'pass',
     sample: 'goal-website-cards.jsonl',
     featuresDetected: ['F11', 'F12', 'F13b', 'F20', 'F21', 'F22', 'F23'],
   },
   {
     platform: 'Cursor IDE',
     workloadId: '14',
-    status: 'partial',
+    status: 'pass',
     sample: 'goal-en-subtitle-fix.txt',
     featuresDetected: ['F11', 'F12', 'F13b'],
   },
   {
     platform: 'Cursor IDE',
     workloadId: '20',
-    status: 'partial',
+    status: 'pass',
     sample: 'goal-video-production.txt',
     featuresDetected: ['F11', 'F12', 'F13b'],
   },
   {
     platform: 'Cursor IDE',
     workloadId: '24',
-    status: 'partial',
+    status: 'pass',
     sample: 'goal-website-figures.txt',
     featuresDetected: ['F11', 'F12', 'F13b'],
   },
