@@ -1,5 +1,5 @@
 ---
-name: goal
+name: goalKeeper
 description: Autonomous goal loop. Use when user types /goal followed by a completion condition. Keeps working across turns until the condition is met, using subagent evaluation and stop hook auto-continuation.
 model: inherit
 readonly: false
@@ -64,11 +64,23 @@ While the goal is active (`status: "pursuing"`), repeat this cycle:
 3. **MANDATORY: Evaluate** — spawn a readonly subagent to judge completion
 4. **Act on result** — YES → mark done. NO → incorporate reason, continue.
 
-⚠️ **CRITICAL RULE:** You MUST call the evaluator subagent (step 3) before
-calling `goal-manage.sh done`. NEVER self-assess. NEVER skip the subagent.
-The whole point of the two-layer architecture is that a SEPARATE model judges
-completion — not you. If you mark done without spawning an evaluator, the
-goal protocol is violated.
+⚠️ **CRITICAL RULE — NO EXCEPTIONS:** You MUST call the evaluator subagent
+(step 3) before calling `goal-manage.sh done`. NEVER self-assess. NEVER skip
+the subagent. Even if your validation scripts show 100% success, even if you
+are absolutely certain the goal is met — you MUST still spawn the evaluator.
+Your confidence does not substitute for external verification. If you mark
+done without spawning an evaluator **in this goal cycle**, the protocol is
+violated.
+
+**These thoughts mean STOP — you are about to self-assess:**
+
+| Your thought | Correct action |
+|---|---|
+| "All checks pass, I'll mark done" | STOP. Spawn evaluator first. |
+| "The evidence is overwhelming" | STOP. Spawn evaluator first. |
+| "I just ran comprehensive validation" | STOP. Spawn evaluator first. |
+| "Zero failures, clearly done" | STOP. Spawn evaluator first. |
+| "This is a simple goal, evaluator is overkill" | STOP. Spawn evaluator first. |
 
 ### Evaluation via Subagent (MANDATORY)
 
@@ -77,7 +89,7 @@ by spawning a real `Task` subagent:
 
 ```
 Task(
-  subagent_type: "generalPurpose",
+  subagent_type: "goal",
   readonly: true,
   description: "Evaluate goal completion",
   prompt: "You are a goal completion evaluator. Determine whether this goal
@@ -103,9 +115,10 @@ Task(
 ### Acting on Evaluation Result
 
 **Subagent returns "YES: ..."**
-1. Run `goal-manage.sh done` via Shell
-2. Report the achievement to the user
-3. End turn normally
+1. Signal the evaluator ran: `touch ~/.durable-request/data/goal-eval-done`
+2. Run `goal-manage.sh done` via Shell
+3. Report the achievement to the user
+4. End turn normally
 
 **Subagent returns "NO: ..."**
 1. Parse the reason — it tells you what remains
@@ -115,12 +128,15 @@ Task(
 
 ### Checklist Before Marking Done
 
-Before you call `goal-manage.sh done`, verify ALL of these:
-- [ ] A `Task(readonly: true)` subagent was spawned with the evaluation prompt
+Before you call `goal-manage.sh done`, verify ALL of these **in the current
+goal cycle** (since the last `goal-manage.sh create`):
+- [ ] A `Task(subagent_type: "goal", readonly: true)` was spawned with the evaluation prompt
 - [ ] The subagent returned a response starting with "YES:"
 - [ ] You are NOT self-assessing (your own judgment does not count)
+- [ ] The evaluator was spawned AFTER your last work, not carried over from a previous cycle
 
 If any of these are false, DO NOT mark done. Spawn the evaluator first.
+An evaluator from a previous goal cycle does NOT count.
 
 ### When to Evaluate
 

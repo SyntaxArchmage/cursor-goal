@@ -60,9 +60,9 @@ install_skill_files() {
   chmod +x "$INSTALL_DIR/goal-stop.sh"
 
   # Install subagent definition
-  if [ -f "${SCRIPT_DIR}/.cursor/agents/goal.md" ]; then
-    cp "${SCRIPT_DIR}/.cursor/agents/goal.md" "$AGENTS_DIR/goal.md"
-    log_info "Installed: $AGENTS_DIR/goal.md"
+  if [ -f "${SCRIPT_DIR}/.cursor/agents/goalKeeper.md" ]; then
+    cp "${SCRIPT_DIR}/.cursor/agents/goalKeeper.md" "$AGENTS_DIR/goalKeeper.md"
+    log_info "Installed: $AGENTS_DIR/goalKeeper.md"
   fi
 
   log_info "Installed: $INSTALL_DIR/goal-manage.sh"
@@ -128,7 +128,7 @@ print_summary() {
   echo -e "${GREEN}============================================${NC}"
   echo ""
   echo "Components:"
-  echo "  goal.md          $AGENTS_DIR/goal.md (subagent)"
+  echo "  goalKeeper.md    $AGENTS_DIR/goalKeeper.md (subagent)"
   echo "  goal-manage.sh   $INSTALL_DIR/goal-manage.sh"
   echo "  goal-stop.sh     $INSTALL_DIR/goal-stop.sh"
   echo "  SKILL.md         $INSTALL_DIR/SKILL.md"

@@ -82,6 +82,9 @@ cmd_create() {
       last_validation_output: $last_validation_output
     }' > "$GOAL_FILE"
 
+  # Clear evaluator signal from any previous cycle
+  rm -f "${DATA_DIR}/goal-eval-done"
+
   echo "[goal] Goal created:"
   echo "  Condition: $condition"
   [ -n "$test_cmd" ] && echo "  Validation: $test_cmd"
@@ -158,6 +161,16 @@ cmd_done() {
   if [ ! -f "$GOAL_FILE" ]; then
     echo "[goal] No active goal to mark done."
     exit 1
+  fi
+
+  local eval_flag="${DATA_DIR}/goal-eval-done"
+  if [ ! -f "$eval_flag" ]; then
+    echo "[goal] ⚠️  WARNING: No evaluator signal detected for this cycle."
+    echo "[goal] Did you spawn a Task(subagent_type: \"goal\", readonly: true) evaluator?"
+    echo "[goal] If not, this is a protocol violation — spawn the evaluator first."
+    echo "[goal] Proceeding anyway, but this should be investigated."
+  else
+    rm -f "$eval_flag"
   fi
 
   jq '.status = "achieved" | .active = false' "$GOAL_FILE" > "${GOAL_FILE}.tmp" \

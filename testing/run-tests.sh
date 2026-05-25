@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Run all pattern checks against sample transcripts
 # Usage: ./run-tests.sh [workload-id]
+#
+# Supports .txt (converted) and .jsonl (raw) sample files.
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,7 +10,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "=== cursor-goal Test Suite ==="
 echo ""
 
-# Check if sample transcripts exist
 SAMPLES_DIR="${SCRIPT_DIR}/samples"
 if [ ! -d "$SAMPLES_DIR" ]; then
     echo "No sample transcripts found in ${SAMPLES_DIR}"
@@ -21,33 +22,44 @@ if [ ! -d "$SAMPLES_DIR" ]; then
     exit 0
 fi
 
-# Run pattern analysis on each sample
 TOTAL=0
 PASSED=0
-for sample in "${SAMPLES_DIR}"/*.txt; do
+FAILED_LIST=""
+
+for sample in "${SAMPLES_DIR}"/*.txt "${SAMPLES_DIR}"/*.jsonl; do
     [ -f "$sample" ] || continue
-    WORKLOAD=$(basename "$sample" .txt)
-    echo "Testing: $WORKLOAD"
+    BASENAME=$(basename "$sample")
+    WORKLOAD="${BASENAME%.*}"
+    echo "Testing: $WORKLOAD (${BASENAME##*.})"
     RESULT=$(python3 "${SCRIPT_DIR}/scripts/patterns.py" "$sample" "$WORKLOAD" 2>/dev/null) || {
         echo "  SKIP (no matching workload features)"
         continue
     }
     PASS_RATE=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['pass_rate'])" 2>/dev/null) || PASS_RATE="0"
+    EXPECTED=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['features_expected'])" 2>/dev/null) || EXPECTED="?"
+    PASS_COUNT=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin)['features_passed'])" 2>/dev/null) || PASS_COUNT="?"
     TOTAL=$((TOTAL + 1))
     if [ "$(echo "$PASS_RATE == 1.0" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
-        echo "  PASS (${PASS_RATE})"
+        echo "  PASS (${PASS_COUNT}/${EXPECTED})"
         PASSED=$((PASSED + 1))
     else
-        echo "  PARTIAL (${PASS_RATE})"
+        echo "  PARTIAL (${PASS_COUNT}/${EXPECTED})"
+        FAILED_LIST="${FAILED_LIST}  ${WORKLOAD}.${BASENAME##*.}\n"
         echo "$RESULT" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
-for fid, r in d['details'].items():
+for fid, r in sorted(d['details'].items()):
     status = 'PASS' if r['found'] else 'FAIL'
-    print(f'    {fid}: {status} (count={r[\"count\"]})')
+    detail = r.get('detail', f'count={r[\"count\"]}')
+    print(f'    {fid}: {status} ({detail})')
 " 2>/dev/null || true
     fi
 done
 
 echo ""
 echo "Results: $PASSED/$TOTAL workloads fully passed"
+if [ -n "$FAILED_LIST" ]; then
+    echo ""
+    echo "Failures:"
+    echo -e "$FAILED_LIST"
+fi
