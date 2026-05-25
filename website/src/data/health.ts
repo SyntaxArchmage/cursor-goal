@@ -130,24 +130,34 @@ export const workloads: Workload[] = [
   },
 ]
 
-export const features: Feature[] = [
-  { id: 'F11', name: 'Goal state initialization', workloadCount: 4, totalWorkloads: 13 },
-  { id: 'F12', name: 'In-turn subagent evaluation', workloadCount: 4, totalWorkloads: 13 },
-  { id: 'F13', name: 'Stop hook auto-continuation', workloadCount: 1, totalWorkloads: 13 },
-  { id: 'F13a', name: 'Validation command execution', workloadCount: 1, totalWorkloads: 13 },
-  { id: 'F13b', name: 'Goal completion marking', workloadCount: 4, totalWorkloads: 13 },
-  { id: 'F14', name: 'Pause/resume lifecycle', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F15', name: 'Natural language parsing', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F16', name: 'Multi-cycle evaluation', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F17', name: 'Budget inline parsing', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F18', name: 'Goal clear/cancel', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F19', name: 'Correct evaluator subagent_type', workloadCount: 0, totalWorkloads: 13 },
-  { id: 'F20', name: 'Evaluator runs readonly', workloadCount: 3, totalWorkloads: 13 },
-  { id: 'F21', name: 'Evaluator prompt contains condition', workloadCount: 3, totalWorkloads: 13 },
-  { id: 'F22', name: 'No self-assessment', workloadCount: 2, totalWorkloads: 13 },
-  { id: 'F23', name: 'Goal has non-empty condition', workloadCount: 3, totalWorkloads: 13 },
-  { id: 'F24', name: 'Done follows evaluator', workloadCount: 0, totalWorkloads: 13 },
-]
+function computeFeatures(): Feature[] {
+  const featureDefs: { id: string; name: string; detectedInWorkloads: number }[] = [
+    { id: 'F11', name: 'Goal state initialization', detectedInWorkloads: 4 },
+    { id: 'F12', name: 'In-turn subagent evaluation', detectedInWorkloads: 4 },
+    { id: 'F13', name: 'Stop hook auto-continuation', detectedInWorkloads: 1 },
+    { id: 'F13a', name: 'Validation command execution', detectedInWorkloads: 1 },
+    { id: 'F13b', name: 'Goal completion marking', detectedInWorkloads: 4 },
+    { id: 'F14', name: 'Pause/resume lifecycle', detectedInWorkloads: 0 },
+    { id: 'F15', name: 'Natural language parsing', detectedInWorkloads: 0 },
+    { id: 'F16', name: 'Multi-cycle evaluation', detectedInWorkloads: 0 },
+    { id: 'F17', name: 'Budget inline parsing', detectedInWorkloads: 0 },
+    { id: 'F18', name: 'Goal clear/cancel', detectedInWorkloads: 0 },
+    { id: 'F19', name: 'Correct evaluator subagent_type', detectedInWorkloads: 0 },
+    { id: 'F20', name: 'Evaluator runs readonly', detectedInWorkloads: 3 },
+    { id: 'F21', name: 'Evaluator prompt contains condition', detectedInWorkloads: 3 },
+    { id: 'F22', name: 'No self-assessment', detectedInWorkloads: 2 },
+    { id: 'F23', name: 'Goal has non-empty condition', detectedInWorkloads: 3 },
+    { id: 'F24', name: 'Done follows evaluator', detectedInWorkloads: 0 },
+  ]
+  return featureDefs.map((f) => ({
+    id: f.id,
+    name: f.name,
+    workloadCount: f.detectedInWorkloads,
+    totalWorkloads: workloads.filter((w) => w.features.includes(f.id)).length,
+  }))
+}
+
+export const features: Feature[] = computeFeatures()
 
 export const systemComponents: SystemComponent[] = [
   { name: 'goalKeeper.md', path: '~/.cursor/agents/goalKeeper.md', status: 'unknown' },
