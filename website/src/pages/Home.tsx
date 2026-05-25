@@ -31,12 +31,11 @@ export default function Home() {
               <span className="text-gradient">cursor-goal</span>
             </h1>
             <p className="text-xl text-gray-400 mb-4 max-w-2xl mx-auto">
-              Autonomous goal loop for Cursor IDE.
               Set a condition. Walk away. Come back to finished work.
             </p>
             <p className="text-[var(--color-muted)] mb-8 max-w-lg mx-auto">
-              Autonomous goal loop for AI coding agents. Works with Cursor, Claude Code, Copilot, and more.
-              First open-source implementation with harness-enforced subagent evaluation.
+              Autonomous goal loop for AI coding agents.
+              Cursor, Claude Code, Copilot, OpenCode.
             </p>
           </motion.div>
 
@@ -75,9 +74,8 @@ export default function Home() {
             <ul className="space-y-3 text-gray-300">
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Persistent objective across turns</li>
               <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Auto-continuation via stop hook</li>
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Subagent evaluator — separate model judges completion</li>
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Turn budgets with automatic wrap-up</li>
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Harness-enforced rules — goal-manage.sh done rejects if no evaluator ran</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Subagent evaluator — no self-assessment</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Harness-enforced — done rejects without evaluator</li>
             </ul>
           </motion.div>
         </div>
@@ -90,14 +88,14 @@ export default function Home() {
             <span className="text-gradient">Core Features</span>
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <FeatureCard icon="🔄" title="Auto-Continuation" desc="Stop hook sends followup_message when the agent ends a turn with the goal still active. No manual re-prompting needed." />
-            <FeatureCard icon="🧠" title="Subagent Evaluator" desc="A readonly subagent evaluates the goal condition — like Claude Code's Haiku evaluator, but using Cursor's Task tool." />
-            <FeatureCard icon="⚡" title="Validation Commands" desc="Use --test to run shell commands for deterministic pass/fail. Test suites, builds, linters — exit code 0 means done." />
-            <FeatureCard icon="📊" title="Turn Budgets" desc="Set --budget to cap turns. Agent gets budget-limited warnings and wraps up cleanly when exhausted." />
-            <FeatureCard icon="⏸️" title="Pause & Resume" desc="Pause auto-continuation, do something else, resume when ready. Full lifecycle control." />
-            <FeatureCard icon="🔗" title="durable-request Compatible" desc="When combined with durable-request, goal completion triggers /deep-sleep — keeping your session alive." />
-            <FeatureCard icon="⚙️" title="Harness-Driven" desc="Rules are programs, not prose. goal-eval.sh, goal-parse.sh, and goal-manage.sh enforce correctness — the agent can't skip evaluation or self-mark done." />
-            <FeatureCard icon="🌐" title="Cross-Platform" desc="Works on Cursor IDE (tested), Cursor CLI, Claude Code, Copilot IDE, and OpenCode — via platform-specific agent definitions." />
+            <FeatureCard icon="🔄" title="Auto-Continuation" desc="Stop hook auto-continues between turns. No manual re-prompting." />
+            <FeatureCard icon="🧠" title="Subagent Evaluator" desc="Readonly subagent judges completion. No self-assessment." />
+            <FeatureCard icon="⚡" title="Validation Commands" desc="--test runs shell commands. Exit 0 = done." />
+            <FeatureCard icon="📊" title="Turn Budgets" desc="--budget caps turns. Clean wrap-up when exhausted." />
+            <FeatureCard icon="⚙️" title="Harness-Driven" desc="Rules are programs, not prose. done rejects without evaluator signal." />
+            <FeatureCard icon="🌐" title="Cross-Platform" desc="Cursor, Claude Code, Copilot, OpenCode." />
+            <FeatureCard icon="⏸️" title="Pause & Resume" desc="Pause, do something else, resume. Full lifecycle control." />
+            <FeatureCard icon="🔗" title="Composable" desc="Pairs with durable-request for persistent sessions." />
           </div>
         </div>
       </section>
@@ -112,7 +110,7 @@ export default function Home() {
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
               <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 text-[var(--color-accent-light)]">Layer 1: In-Turn Evaluation</h3>
-                <p className="text-[var(--color-muted)] text-sm mb-4">Agent spawns a readonly subagent to evaluate the goal condition within the same turn.</p>
+                <p className="text-[var(--color-muted)] text-sm mb-4">Harness generates evaluator prompt, agent spawns subagent, harness parses result.</p>
                 <CodeBlock title="Harness evaluation">{`Agent works → runs tests
   ↓
 goal-eval.sh prompt → generates evaluator prompt
@@ -126,7 +124,7 @@ goal-eval.sh parse-result → YES/NO
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
               <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 text-[var(--color-emerald)]">Layer 2: Between-Turn Safety Net</h3>
-                <p className="text-[var(--color-muted)] text-sm mb-4">Stop hook fires when the turn ends. If goal is still active, it auto-continues.</p>
+                <p className="text-[var(--color-muted)] text-sm mb-4">When a turn ends with the goal active, the stop hook auto-continues.</p>
                 <CodeBlock title="goal-stop.sh">{`Turn ends → stop hook reads goal.json
   ↓
 Goal still active?
@@ -214,7 +212,7 @@ cd cursor-goal && ./install-goal.sh`}</CodeBlock>
           <div>🎯 cursor-goal — MIT License</div>
           <div className="flex gap-4 mt-2 md:mt-0">
             <a href="https://github.com/SyntaxArchmage/cursor-goal" className="hover:text-white transition-colors">GitHub</a>
-            <span>First open-source /goal for Cursor</span>
+            <span>Open-source autonomous goal loop</span>
           </div>
         </div>
       </footer>

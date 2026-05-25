@@ -43,14 +43,12 @@ export default function Docs() {
           <span className="text-gradient">Documentation</span>
         </h1>
         <p className="text-[var(--color-muted)] mb-12 text-lg">
-          Complete reference for the <code className="text-[var(--color-accent-light)]">/goal</code> command —
-          autonomous goal loops for Cursor IDE.
+          Reference for the <code className="text-[var(--color-accent-light)]">/goal</code> command.
         </p>
 
         <Section title="Harness Scripts">
           <p className="text-gray-300 mb-6 leading-relaxed">
-            Rules are enforced by programs, not prose. The agent calls these scripts via Shell —
-            the scripts enforce correctness.
+            Rules are programs, not prose. The agent calls these via Shell.
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl overflow-hidden">
@@ -84,8 +82,7 @@ export default function Docs() {
 
         <Section title="How It Works">
           <p className="text-gray-300 mb-6 leading-relaxed">
-            cursor-goal uses a two-layer architecture: in-turn subagent evaluation for fast feedback,
-            plus a stop hook safety net that auto-continues between turns when the goal is still active.
+            In-turn subagent evaluation + between-turn stop hook safety net.
           </p>
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
@@ -174,8 +171,7 @@ Still pursuing?
 
         <Section title="Writing Good Conditions">
           <p className="text-gray-300 mb-4 leading-relaxed">
-            Conditions work best when they describe a verifiable end state — like telling a colleague
-            &ldquo;keep going until&hellip;&rdquo;
+            Describe a verifiable end state.
           </p>
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <Card>
@@ -218,7 +214,7 @@ Still pursuing?
             </Card>
           </div>
           <p className="text-[var(--color-muted)] text-sm mb-4">
-            You can embed verification commands and turn budgets inline in natural language:
+            Embed commands and budgets inline:
           </p>
           <CodeBlock title="Inline parsing">{`/goal all tests pass, verified by npm test, stop after 20 turns
 /goal drain the P1 issue backlog until the queue is empty`}</CodeBlock>
@@ -296,8 +292,7 @@ Still pursuing?
 
         <Section title="Stop Hook Behavior">
           <p className="text-gray-300 mb-4 leading-relaxed">
-            The stop hook (<code>goal-stop.sh</code>) fires when an agent turn ends. It reads{' '}
-            <code>goal.json</code> and decides whether to auto-continue:
+            Fires when a turn ends. Reads <code>goal.json</code> and decides:
           </p>
           <ul className="space-y-3 text-gray-300 mb-6">
             <li className="flex gap-3">
@@ -328,7 +323,7 @@ Still pursuing?
 
         <Section title="Turn Budget Mechanics">
           <p className="text-gray-300 mb-4 leading-relaxed">
-            Each auto-continued turn increments the counter. When the budget is exhausted:
+            When the budget is exhausted:
           </p>
           <ol className="list-decimal list-inside space-y-2 text-gray-300 mb-6">
             <li>Stop hook sets <code>status: "budget-limited"</code> and <code>active: false</code></li>
@@ -381,7 +376,7 @@ Still pursuing?
             </table>
           </div>
           <p className="text-[var(--color-muted)] text-sm">
-            Only Cursor IDE has been end-to-end tested. Other platforms are supported via agent definitions but untested.
+            Only Cursor IDE is end-to-end tested. Other platforms have agent definitions but are untested.
           </p>
         </Section>
 
@@ -406,7 +401,7 @@ Still pursuing?
               </li>
               <li className="flex gap-2">
                 <span className="text-[var(--color-emerald)]">✓</span>
-                No checkpoints fire during active goal pursuit (F-NOT inverse check)
+                No checkpoints during active goal pursuit
               </li>
               <li className="flex gap-2">
                 <span className="text-[var(--color-emerald)]">✓</span>
