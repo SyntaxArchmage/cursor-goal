@@ -62,7 +62,7 @@ All platforms use the same scripts via Shell:
 | `goal-eval.sh` | Evaluator prompt generation, signal, result parsing |
 | `goal-stop.sh` | Stop hook auto-continuation |
 
-State file: `~/.durable-request/data/goal.json`
+State file: `~/.cursor-goal/data/goal.json`
 
 ## Platform Limitations
 

@@ -10,7 +10,7 @@ set -euo pipefail
 #   clear
 #   done
 
-DATA_DIR="${HOME}/.durable-request/data"
+DATA_DIR="${CURSOR_GOAL_DATA:-${HOME}/.cursor-goal/data}"
 GOAL_FILE="${DATA_DIR}/goal.json"
 
 mkdir -p "$DATA_DIR"

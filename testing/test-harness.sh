@@ -12,7 +12,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT_DIR="${REPO_ROOT}/.cursor/skills/goal"
 TEST_HOME="$(mktemp -d)"
 export HOME="$TEST_HOME"
-DATA_DIR="${HOME}/.durable-request/data"
+DATA_DIR="${HOME}/.cursor-goal/data"
 
 trap 'rm -rf "$TEST_HOME"' EXIT
 

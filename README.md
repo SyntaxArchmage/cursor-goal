@@ -187,7 +187,7 @@ Include the check method and turn cap inline:
 ├── goal-parse.sh              # Input parser
 └── goal-stop.sh               # Stop hook (auto-continuation)
 
-~/.durable-request/data/
+~/.cursor-goal/data/
 ├── goal.json                  # Runtime state (created at first use)
 └── goal-eval-done             # Evaluator signal (transient)
 ```
@@ -205,7 +205,7 @@ bash testing/run-tests.sh
 ## Compatible With
 
 - **Standalone:** Works on its own for any project
-- **durable-request:** When combined, goal completion triggers `/deep-sleep` instead of a checkpoint
+- **durable-request:** Optional integration — goal completion can trigger `/deep-sleep`
 
 ## License
 

@@ -12,7 +12,7 @@ set -euo pipefail
 #   goal-eval.sh check                               → exit 0 if evaluator ran, 1 if not
 #   goal-eval.sh parse-result "<subagent output>"    → print YES/NO and reason
 
-DATA_DIR="${HOME}/.durable-request/data"
+DATA_DIR="${CURSOR_GOAL_DATA:-${HOME}/.cursor-goal/data}"
 GOAL_FILE="${DATA_DIR}/goal.json"
 EVAL_FLAG="${DATA_DIR}/goal-eval-done"
 

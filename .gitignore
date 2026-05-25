@@ -3,7 +3,7 @@ dist/
 *.log
 .DS_Store
 testing/results/run-*/
-~/.durable-request/data/goal.json
+~/.cursor-goal/data/goal.json
 website/node_modules/
 website/dist/
 testing/scripts/__pycache__/

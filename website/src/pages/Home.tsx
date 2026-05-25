@@ -30,12 +30,8 @@ export default function Home() {
             <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
               <span className="text-gradient">cursor-goal</span>
             </h1>
-            <p className="text-xl text-gray-400 mb-4 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
               Set a condition. Walk away. Come back to finished work.
-            </p>
-            <p className="text-[var(--color-muted)] mb-8 max-w-lg mx-auto">
-              Autonomous goal loop for AI coding agents.
-              Cursor, Claude Code, Copilot, OpenCode.
             </p>
           </motion.div>
 
@@ -72,10 +68,10 @@ export default function Home() {
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
             <h2 className="text-2xl font-bold mb-6 text-[var(--color-emerald)]">With cursor-goal</h2>
             <ul className="space-y-3 text-gray-300">
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Persistent objective across turns</li>
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Auto-continuation via stop hook</li>
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Subagent evaluator — no self-assessment</li>
-              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Harness-enforced — done rejects without evaluator</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Goal persists across agent turns</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Clean wrap-up when budget runs out</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Natural language — just describe done</li>
+              <li className="flex gap-3"><span className="text-[var(--color-emerald)]">✓</span> Pause, resume, clear anytime</li>
             </ul>
           </motion.div>
         </div>
@@ -95,7 +91,7 @@ export default function Home() {
             <FeatureCard icon="⚙️" title="Harness-Driven" desc="Rules are programs, not prose. done rejects without evaluator signal." />
             <FeatureCard icon="🌐" title="Cross-Platform" desc="Cursor, Claude Code, Copilot, OpenCode." />
             <FeatureCard icon="⏸️" title="Pause & Resume" desc="Pause, do something else, resume. Full lifecycle control." />
-            <FeatureCard icon="🔗" title="Composable" desc="Pairs with durable-request for persistent sessions." />
+            <FeatureCard icon="🔓" title="Standalone" desc="No dependencies beyond jq and bash. Works with any project." />
           </div>
         </div>
       </section>
@@ -173,35 +169,11 @@ Install the /goal skill from https://github.com/SyntaxArchmage/cursor-goal
 # Or automated:
 git clone https://github.com/SyntaxArchmage/cursor-goal.git
 cd cursor-goal && ./install-goal.sh`}</CodeBlock>
-          <div className="mt-8 grid md:grid-cols-3 gap-4 text-sm">
+          <div className="mt-8 max-w-sm mx-auto text-sm">
             <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4">
               <div className="text-[var(--color-accent-light)] font-semibold mb-1">Requirements</div>
-              <div className="text-[var(--color-muted)]">jq, bash 4+</div>
+              <div className="text-[var(--color-muted)]">bash 4+, jq. No other dependencies.</div>
             </div>
-            <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4">
-              <div className="text-[var(--color-emerald)] font-semibold mb-1">Cross-Platform</div>
-              <div className="text-[var(--color-muted)]">Cursor, Claude Code, Copilot, OpenCode</div>
-            </div>
-            <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4">
-              <div className="text-[var(--color-accent-light)] font-semibold mb-1">Composable</div>
-              <div className="text-[var(--color-muted)]">Pairs with durable-request</div>
-            </div>
-          </div>
-
-          <div className="mt-12">
-            <h3 className="text-xl font-semibold mb-4">Quick Usage</h3>
-            <CodeBlock title="Cursor Agent Chat">{`# Natural language — just say what "done" looks like
-/goal all tests pass and lint is clean
-/goal migrate every API call to v2 until the build succeeds
-/goal fix the failing CI, stop after 10 turns
-
-# Check status
-/goal status
-
-# Pause / Resume / Clear
-/goal pause
-/goal resume
-/goal clear`}</CodeBlock>
           </div>
         </div>
       </section>

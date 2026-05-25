@@ -156,7 +156,7 @@ Conditions work best when they describe a verifiable end state:
 
 ## State File
 
-Located at `~/.durable-request/data/goal.json`:
+Located at `~/.cursor-goal/data/goal.json`:
 
 ```json
 {

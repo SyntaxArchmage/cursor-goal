@@ -35,7 +35,7 @@ cd cursor-goal && ./install-goal.sh
 | `~/.cursor/skills/goal/goal-parse.sh` | Input parser (natural language → structured args) |
 | `~/.cursor/skills/goal/goal-stop.sh` | Stop hook — auto-continues agent between turns |
 | `~/.cursor/hooks.json` | Registers the stop hook with Cursor |
-| `~/.durable-request/data/goal.json` | Runtime state (created at first use) |
+| `~/.cursor-goal/data/goal.json` | Runtime state (created at first use) |
 
 ## Requirements
 
@@ -63,7 +63,7 @@ git clone https://github.com/SyntaxArchmage/cursor-goal.git
 cd cursor-goal
 
 # 1. Copy harness scripts (universal — all platforms use these)
-mkdir -p ~/.cursor/skills/goal ~/.durable-request/data
+mkdir -p ~/.cursor/skills/goal ~/.cursor-goal/data
 cp .cursor/skills/goal/goal-manage.sh ~/.cursor/skills/goal/
 cp .cursor/skills/goal/goal-eval.sh   ~/.cursor/skills/goal/
 cp .cursor/skills/goal/goal-parse.sh  ~/.cursor/skills/goal/
@@ -119,7 +119,7 @@ You should see: `[goal] No active goal.`
 ```bash
 rm -f ~/.cursor/agents/goalKeeper.md
 rm -rf ~/.cursor/skills/goal
-rm -f ~/.durable-request/data/goal.json
-rm -f ~/.durable-request/data/goal-eval-done
+rm -f ~/.cursor-goal/data/goal.json
+rm -f ~/.cursor-goal/data/goal-eval-done
 # Remove the stop hook entry from ~/.cursor/hooks.json manually
 ```

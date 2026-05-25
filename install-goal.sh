@@ -20,7 +20,7 @@ NC='\033[0m'
 
 INSTALL_DIR="${HOME}/.cursor/skills/goal"
 AGENTS_DIR="${HOME}/.cursor/agents"
-DATA_DIR="${HOME}/.durable-request/data"
+DATA_DIR="${HOME}/.cursor-goal/data"
 CURSOR_HOOKS_FILE="${HOME}/.cursor/hooks.json"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

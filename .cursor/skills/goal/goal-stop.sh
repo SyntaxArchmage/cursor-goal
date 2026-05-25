@@ -13,7 +13,7 @@ set -euo pipefail
 # hooks.json config:
 #   { "stop": [{ "command": "~/.cursor/skills/goal/goal-stop.sh", "loop_limit": null, "timeout": 30 }] }
 
-GOAL_FILE="${HOME}/.durable-request/data/goal.json"
+GOAL_FILE="${CURSOR_GOAL_DATA:-${HOME}/.cursor-goal/data}/goal.json"
 
 # Read Cursor's stop hook input
 INPUT=$(cat)
