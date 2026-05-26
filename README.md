@@ -195,12 +195,23 @@ Include the check method and turn cap inline:
 ## Testing
 
 ```bash
-# Harness unit tests (68 tests)
+# Harness unit tests (68 tests — goal-parse, goal-eval, goal-manage)
 bash testing/test-harness.sh
 
-# Subagent pattern tests (requires transcript samples)
+# Transcript pattern tests (requires manual session samples)
 bash testing/run-tests.sh
+
+# Subagent-based tests (9 features verified: F11, F13a/b, F15, F17, F18, F22-F24)
+# See testing/subagent-tests/ for workloads and results
 ```
+
+### Feature Testability
+
+| Method | Features | Notes |
+|--------|----------|-------|
+| Subagent (`Task`) | F11, F13a, F13b, F15, F17, F18, F22, F23, F24 | Single-turn, automated |
+| Parent agent | F12, F19, F20, F21 | Need `Task` tool (subagents can't nest) |
+| `cursor-agent` session | F13, F14, F16 | Need IDE stop hook / multi-turn |
 
 ## Compatible With
 

@@ -132,22 +132,22 @@ export const workloads: Workload[] = [
 
 function computeFeatures(): Feature[] {
   const featureDefs: { id: string; name: string; detectedInWorkloads: number }[] = [
-    { id: 'F11', name: 'Goal state initialization', detectedInWorkloads: 4 },
+    { id: 'F11', name: 'Goal state initialization', detectedInWorkloads: 9 },
     { id: 'F12', name: 'In-turn subagent evaluation', detectedInWorkloads: 4 },
     { id: 'F13', name: 'Stop hook auto-continuation', detectedInWorkloads: 1 },
-    { id: 'F13a', name: 'Validation command execution', detectedInWorkloads: 1 },
-    { id: 'F13b', name: 'Goal completion marking', detectedInWorkloads: 4 },
+    { id: 'F13a', name: 'Validation command execution', detectedInWorkloads: 2 },
+    { id: 'F13b', name: 'Goal completion marking', detectedInWorkloads: 8 },
     { id: 'F14', name: 'Pause/resume lifecycle', detectedInWorkloads: 0 },
-    { id: 'F15', name: 'Natural language parsing', detectedInWorkloads: 0 },
+    { id: 'F15', name: 'Natural language parsing', detectedInWorkloads: 1 },
     { id: 'F16', name: 'Multi-cycle evaluation', detectedInWorkloads: 0 },
-    { id: 'F17', name: 'Budget inline parsing', detectedInWorkloads: 0 },
-    { id: 'F18', name: 'Goal clear/cancel', detectedInWorkloads: 0 },
+    { id: 'F17', name: 'Budget inline parsing', detectedInWorkloads: 1 },
+    { id: 'F18', name: 'Goal clear/cancel', detectedInWorkloads: 1 },
     { id: 'F19', name: 'Correct evaluator subagent_type', detectedInWorkloads: 0 },
     { id: 'F20', name: 'Evaluator runs readonly', detectedInWorkloads: 2 },
     { id: 'F21', name: 'Evaluator prompt contains condition', detectedInWorkloads: 2 },
-    { id: 'F22', name: 'No self-assessment', detectedInWorkloads: 1 },
-    { id: 'F23', name: 'Goal has non-empty condition', detectedInWorkloads: 2 },
-    { id: 'F24', name: 'Done follows evaluator', detectedInWorkloads: 0 },
+    { id: 'F22', name: 'No self-assessment', detectedInWorkloads: 5 },
+    { id: 'F23', name: 'Goal has non-empty condition', detectedInWorkloads: 8 },
+    { id: 'F24', name: 'Done follows evaluator', detectedInWorkloads: 2 },
   ]
   return featureDefs.map((f) => ({
     id: f.id,
